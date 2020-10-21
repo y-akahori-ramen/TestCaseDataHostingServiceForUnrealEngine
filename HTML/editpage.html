@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
+  <title>Hello, world!</title>
+
+  <style>
+    .editarea {
+      height: 100p;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+      <a class="navbar-brand" href="#">TestCaseHosting</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
+        aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="#">Help</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Begin page content -->
+  <main role="main">
+    <div class="container mt-5">
+      <div class="row p-3">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="#">Root</a></li>
+            <li class="breadcrumb-item"><a href="#">Internal</a></li>
+            <li class="breadcrumb-item"><a href="#">Walk</a></li>
+            <li class="breadcrumb-item active" aria-current="page">TestCaseName</li>
+          </ol>
+        </nav>
+      </div>
+      <div class="row">
+        <div class="col-9">
+          <div id="editor" class="rounded shadow-sm"></div>
+        </div>
+        <div class="col-3">
+          <form>
+            <div class="form-group">
+              <label for="exampleInput" class="border-bottom border-gray"><strong>概要</strong></label>
+              <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" style="resize: none;"></textarea>
+            </div>
+            <button type="submit" class="btn btn-secondary">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Optional JavaScript -->
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+  <script src="https://pagecdn.io/lib/ace/1.4.12/ace.min.js"></script> 
+  <script src="https://pagecdn.io/lib/ace/1.4.12/theme-monokai.min.js"></script> 
+  
+  <script>
+    var editor;
+    $(document).ready(function () {
+      hsize = $(window).height();
+      $("#editor").css("height", hsize * 0.8 + "px");
+
+      editor = ace.edit("editor");
+      editor.$blockScrolling = Infinity;
+      editor.setTheme("ace/theme/monokai");
+      editor.setShowPrintMargin(false);
+      // editor.setPrintMarginColumn(10)
+      // editor.getSession().setMode("ace/mode/html");
+    });
+    $(window).resize(function() {
+      hsize = $(window).height();
+      $("#editor").css("height", hsize * 0.8 + "px");
+      editor.resize();
+    })
+  </script>
+</body>
+
+</html>
