@@ -1,0 +1,28 @@
+version: '3'
+services:
+  webapp:
+    build: ./python
+    volumes:
+      - ../app:/home/app/ # Djangoプロジェクトのマウント
+      - django_statics:/home/static:rw  # collectstaticで静的コンテンツを収集する先のボリューム指定
+    environment:
+      STATIC_ROOT: '/home/static' # settings.pyでSTATIC_ROOTを環境変数"STATIC_ROOT"で指定している。マウントしたdjang_staticsに収集するように設定
+    entrypoint:
+      - /home/data/entrypoint.sh # コンテナ起動後に静的コンテンツ収集、マイグレーション、サーバー起動を行うシェルスクリプト指定
+  nginx:
+    image: nginx:1.19.2
+    ports:
+      - 80:8000 # 環境変数LISTEN_PORTがnginx側の待ち受けるポートのため転送先は必ずLISTENN_PORTと合わせる必要がある。この場合8000が転送先
+    volumes:
+      - ./nginx/uwsgi:/home/uwsgi
+      - ./nginx/templates:/etc/nginx/templates
+      - django_statics:/home/static:ro  # Djangoの静的コンテンツが入ったデータボリュームをマウント
+    environment: # 環境変数でnginxnのconfファイルの内容を書き換えられるようにしている。
+      LISTEN_PORT: 8000 # nginx側で待ち受けるポート
+      UWSGI_IP: webapp:8001 # Django側で起動したuWSGIは8001で待ち受けている。※8001の指定はは python/data/django_uwsgi.ini にあります。
+      SEVER_NAME: localhost
+      UWSGI_PARAMS_PATH: /home/uwsgi/uwsgi_params # volumesで指定したuwsgi_paramの場所をしてい
+      STATIC_PATH: /home/static # volumesでマウントした静的コンテンツの場所を指定
+volumes: # 静的コンテンツをdjango_staticsデータボリュームに配置しwebapp,nginxコンテナで共有させる
+  django_statics:
+    driver: local

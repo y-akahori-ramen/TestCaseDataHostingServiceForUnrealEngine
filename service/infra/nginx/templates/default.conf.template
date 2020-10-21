@@ -1,0 +1,25 @@
+upstream django {
+    server ${UWSGI_IP}; # for a web port socket (we'll use this first)
+}
+
+# configuration of the server
+server {
+    # the port your site will be served on
+    listen      ${LISTEN_PORT};
+    # the domain name it will serve for
+    server_name ${SEVER_NAME}; # substitute your machine's IP address or FQDN
+    charset     utf-8;
+
+    # max upload size
+    client_max_body_size 75M;   # adjust to taste
+
+    location /static {
+        alias ${STATIC_PATH}; # your Django project's static files - amend as required
+    }
+
+    # Finally, send all non-media requests to the Django server.
+    location / {
+        uwsgi_pass  django;
+        include     ${UWSGI_PARAMS_PATH}; # the uwsgi_params file you installed
+    }
+}
