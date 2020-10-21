@@ -1,0 +1,15 @@
+FastTravel -id FTP_GameStart
+StartCSVProfile
+PlayEpisode -ep CHP1_PROLOGUE
+PlayEpisode -ep CHP1_0040
+PlayEpisode -ep CHP1_0050
+PlayEpisode -ep CHP1_0052
+PlayEpisode -ep CHP1_0055
+PlayEpisode -ep CHP1_0070
+PlayEpisode -ep CHP1_0080
+PlayEpisode -ep CHP1_0090
+PlayEpisode -ep CHP1_0100
+PlayEpisode -ep CHP1_0110
+PlayEpisode -ep CHP1_0120
+PlayEpisode -ep CHP1_0130
+StopCSVProfile -profileName PROLOGUEtoCHP1_0130
