@@ -1,3 +1,5 @@
+{% load static %}
+
 <!doctype html>
 <html lang="en">
 
@@ -21,14 +23,14 @@
         .forlderitemimage {
             width: 32px;
             height: 32px;
-            background-image:url("resouce/folder.svg");
+            background-image:url("{% static 'hosting/folder.svg' %}");
             background-repeat:  no-repeat;
             background-size: 100%;
         }
         .dataitemimage {
             width: 32px;
             height: 32px;
-            background-image:url("resouce/file-earmark-text.svg");
+            background-image:url("{% static 'hosting/file-earmark-text.svg' %}");
             background-repeat:  no-repeat;
             background-size: 100%;
         }
@@ -78,12 +80,10 @@
                 <div class="d-flex justify-content-between align-items-center w-100 border-bottom border-gray">
                     <h6>Items</h6>
                     <a href="#">
-                        <img class="mr-2 add_icon" src="resouce/plus-square.svg">
+                        <img class="mr-2 add_icon" src="{% static 'hosting/plus-square.svg' %}">
                     </a>
                 </div>
-                <!-- <h6 class="border-bottom border-gray pb-2 mb-0">Items</h6> -->
                 <div class="media text-muted pt-3">
-                    <!-- <img class="mr-2 itemimage" src="resouce/folder.svg"> -->
                     <div class="mr-2 forlderitemimage"></div>
                     <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
                         <div class="d-flex justify-content-between align-items-center w-100">
