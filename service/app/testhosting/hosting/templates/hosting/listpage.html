@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
         integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
 
-    <title>Hello, world!</title>
+    <title>TestCase</title>
 
     <style>
         .itemimage {
@@ -49,7 +49,7 @@
     <header>
         <!-- Fixed navbar -->
         <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-            <a class="navbar-brand" href="#">TestCaseHosting</a>
+            <a class="navbar-brand" href="{% url 'hosting:index' %}">TestCaseHosting</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
                 aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -74,7 +74,7 @@
                             {% if breadcrumb_item.is_active %}
                             <li class="breadcrumb-item active" aria-current="page">{{ breadcrumb_item.name }}</a></li>
                             {% else %}
-                            <li class="breadcrumb-item"><a href="{% url 'index' %}?path={{ breadcrumb_item.url_param }}">{{ breadcrumb_item.name }}</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'hosting:index' %}?path={{ breadcrumb_item.url_param }}">{{ breadcrumb_item.name }}</a></li>
                             {% endif %}
                         {% endfor %}
                     </ol>
@@ -98,9 +98,9 @@
                         <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
                             <div class="d-flex justify-content-between align-items-center w-100">
                                 {% if list_item.is_directory %}
-                                <strong class="text-gray-dark"><a class="text-secondary" href="{% url 'index' %}?path={{ list_item.path_for_url_param }}">{{ list_item.name }}</a></strong>
+                                <strong class="text-gray-dark"><a class="text-secondary" href="{% url 'hosting:index' %}?path={{ list_item.path_for_url_param }}">{{ list_item.name }}</a></strong>
                                 {% else %}
-                                <strong class="text-gray-dark"><a class="text-secondary" href="{% url 'edit' %}?path={{ list_item.path_for_url_param }}">{{ list_item.name }}</a></strong>
+                                <strong class="text-gray-dark"><a class="text-secondary" href="{% url 'hosting:edit' %}?path={{ list_item.path_for_url_param }}">{{ list_item.name }}</a></strong>
                                 {% endif %}
                                 <div>
                                     <a class="text-secondary" href="#">Delete</a>

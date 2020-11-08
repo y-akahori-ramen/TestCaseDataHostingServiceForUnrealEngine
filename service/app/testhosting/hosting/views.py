@@ -2,9 +2,9 @@ import re
 from dataclasses import dataclass
 from typing import List
 
-from django.shortcuts import render
-from django.http import HttpResponse
-from django.shortcuts import render
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render, get_object_or_404
+from django.urls import reverse
 
 from .models import TestCase
 
@@ -56,7 +56,8 @@ def GetTestCaseListItems(cur_dir_path) -> List[TestCaseListItem]:
             if is_directory:
                 list_item_summary = ""
             else:
-                list_item_summary = testcase.summary
+                # 概要が複数行の場合、先頭１行を表示させる
+                list_item_summary = testcase.summary.splitlines()[0]
             results.append(TestCaseListItem(listitem_name, f'{cur_dir_path}/{listitem_name}', is_directory, list_item_summary))
 
     return results
@@ -76,7 +77,7 @@ def GetBreadcrumbItems(cur_dir_path) -> List[BreadcrumbItem]:
             result.append(BreadcrumbItem(item, url_param, num_item == index))
     
     return result
-    
+
 def index(request):
     if 'path' in request.GET:
         cur_dir = request.GET['path']
@@ -90,11 +91,51 @@ def index(request):
         'breadcrumb_items' : breadcrumb_items
     }
 
-    for breadcrumb_item in breadcrumb_items:
-        print(f'name: {breadcrumb_item.name} param: {breadcrumb_item.url_param} Current: {breadcrumb_item.is_active}')
-
     return render(request, 'hosting/listpage.html', params)
 
 
+def edit_get(request):
+    if 'path' in request.GET:
+        path = request.GET['path']
+    else:
+        path = ''
+
+    # submitされた場合にデータの更新を行い、以前のリストページへリダイレクト
+
+    testcase_data = get_object_or_404(TestCase, title_path=path)
+
+    breadcrumb_items = GetBreadcrumbItems(path)
+
+    # パンくずリストの末尾が自分のデータのパスなのでそれより１つ前が戻るべきパスとなる
+    backurl_path = breadcrumb_items[-2].url_param
+
+    params = {
+        'breadcrumb_items' : breadcrumb_items,
+        'summary' : testcase_data.summary,
+        'data' : testcase_data.testcase_data,
+        'backurl_path' : backurl_path,
+        'cur_path' : path,
+    }
+    return render(request, 'hosting/editpage.html', params)
+
+def edit_post(request):
+    testcase_data = get_object_or_404(TestCase, title_path=request.GET['path'])
+    testcase_data.summary = request.POST['summary']
+    testcase_data.testcase_data = request.POST['testcasedata']
+    testcase_data.save()
+
+    # 一つ前のリストに戻す
+    breadcrumb_items = GetBreadcrumbItems(request.GET['path'])
+    backurl_path = breadcrumb_items[-2].url_param
+
+    redirect_uri = reverse('hosting:index') + f'?path={backurl_path}'
+    return HttpResponseRedirect(redirect_uri)
+
 def edit(request):
-    return HttpResponse('EditPage')
+    if request.method == 'GET':
+        return edit_get(request)
+    elif request.method == 'POST':
+        return edit_post(request)
+
+
+
