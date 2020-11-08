@@ -14,6 +14,13 @@ class TestCaseListItem:
     name: str
     path_for_url_param: str
     is_directory: bool
+    summary: str
+
+@dataclass(frozen=True)
+class BreadcrumbItem:
+    name: str
+    url_param: str
+    is_active: bool
 
 
 def GetTestCaseListItems(cur_dir_path) -> List[TestCaseListItem]:
@@ -46,13 +53,30 @@ def GetTestCaseListItems(cur_dir_path) -> List[TestCaseListItem]:
         # リスト表示画面では１アイテムだけ表示すれば良いので１つだけ登録するようにする。
         exist = next((item for item in results if item.name == listitem_name), None)
         if exist is None:
-            results.append(TestCaseListItem(listitem_name, f'{cur_dir_path}/{listitem_name}', is_directory))
+            if is_directory:
+                list_item_summary = ""
+            else:
+                list_item_summary = testcase.summary
+            results.append(TestCaseListItem(listitem_name, f'{cur_dir_path}/{listitem_name}', is_directory, list_item_summary))
 
     return results
 
-# Create your views here.
-
-
+def GetBreadcrumbItems(cur_dir_path) -> List[BreadcrumbItem]:
+    items = cur_dir_path.split('/')
+    result = []
+    url_param = ''
+    num_item = len(items)
+    index = 0
+    for item in items:
+        index = index + 1
+        if item == '':
+            result.append(BreadcrumbItem('Root', '', False))
+        else:
+            url_param += f'/{item}'
+            result.append(BreadcrumbItem(item, url_param, num_item == index))
+    
+    return result
+    
 def index(request):
     if 'path' in request.GET:
         cur_dir = request.GET['path']
@@ -60,13 +84,17 @@ def index(request):
         cur_dir = ''
 
     list_items = GetTestCaseListItems(cur_dir)
+    breadcrumb_items = GetBreadcrumbItems(cur_dir)
+    params = {
+        'list_items' : list_items,
+        'breadcrumb_items' : breadcrumb_items
+    }
 
-    if len(list_items) == 0:
-        return HttpResponse('テストケースが見つかりません')
-    else:
-        iteminfos = [f'name:{item.name} urlpatm:{item.path_for_url_param} dir:{item.is_directory}' for item in list_items]
-    return HttpResponse('<br>'.join(iteminfos))
+    for breadcrumb_item in breadcrumb_items:
+        print(f'name: {breadcrumb_item.name} param: {breadcrumb_item.url_param} Current: {breadcrumb_item.is_active}')
+
+    return render(request, 'hosting/listpage.html', params)
 
 
-def listTest(request):
-    return render(request, 'hosting/listpage.html')
+def edit(request):
+    return HttpResponse('EditPage')

@@ -70,9 +70,13 @@
             <div class="row p-3">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="#">Root</a></li>
-                        <li class="breadcrumb-item"><a href="#">Internal</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Walk</li>
+                        {% for breadcrumb_item in breadcrumb_items %}
+                            {% if breadcrumb_item.is_active %}
+                            <li class="breadcrumb-item active" aria-current="page">{{ breadcrumb_item.name }}</a></li>
+                            {% else %}
+                            <li class="breadcrumb-item"><a href="{% url 'index' %}?path={{ breadcrumb_item.url_param }}">{{ breadcrumb_item.name }}</a></li>
+                            {% endif %}
+                        {% endfor %}
                     </ol>
                 </nav>
             </div>
@@ -83,104 +87,31 @@
                         <img class="mr-2 add_icon" src="{% static 'hosting/plus-square.svg' %}">
                     </a>
                 </div>
-                <div class="media text-muted pt-3">
-                    <div class="mr-2 forlderitemimage"></div>
-                    <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
-                        <div class="d-flex justify-content-between align-items-center w-100">
-                            <strong class="text-gray-dark"><a class="text-secondary" href="#">WalkTestCases</a></strong>
-                            <div>
-                                <a class="text-secondary" href="#">Delete</a>
-                                /
-                                <a class="text-secondary" href="#">Rename</a>
+          
+                {% for list_item in list_items %}
+                    <div class="media text-muted pt-3">
+                        {% if list_item.is_directory %}                        
+                        <div class="mr-2 forlderitemimage"></div>
+                        {% else %}
+                        <div class="mr-2 dataitemimage"></div>
+                        {% endif %}
+                        <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
+                            <div class="d-flex justify-content-between align-items-center w-100">
+                                {% if list_item.is_directory %}
+                                <strong class="text-gray-dark"><a class="text-secondary" href="{% url 'index' %}?path={{ list_item.path_for_url_param }}">{{ list_item.name }}</a></strong>
+                                {% else %}
+                                <strong class="text-gray-dark"><a class="text-secondary" href="{% url 'edit' %}?path={{ list_item.path_for_url_param }}">{{ list_item.name }}</a></strong>
+                                {% endif %}
+                                <div>
+                                    <a class="text-secondary" href="#">Delete</a>
+                                    /
+                                    <a class="text-secondary" href="#">Rename</a>
+                                </div>
                             </div>
+                            <span class="d-block">{{ list_item.summary }}</span>
                         </div>
-                        <span class="d-block"></span>
                     </div>
-                </div>
-                <div class="media text-muted pt-3">
-                    <div class="mr-2 dataitemimage"></div>
-                    <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
-                        <div class="d-flex justify-content-between align-items-center w-100">
-                            <strong><a class="text-secondary" href="#">Forest001</a></strong>
-                            <div>
-                                <a class="text-secondary" href="#">Delete</a>
-                                /
-                                <a class="text-secondary" href="#">Rename</a>
-                            </div>
-                        </div>
-                        <span class="d-block">森を歩く自動テスト</span>
-                    </div>
-                </div>
-                <div class="media text-muted pt-3">
-                    <div class="mr-2 dataitemimage"></div>
-                    <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
-                        <div class="d-flex justify-content-between align-items-center w-100">
-                            <strong><a class="text-secondary" href="#">Forest001</a></strong>
-                            <div>
-                                <a class="text-secondary" href="#">Delete</a>
-                                /
-                                <a class="text-secondary" href="#">Rename</a>
-                            </div>
-                        </div>
-                        <span class="d-block">森を歩く自動テスト</span>
-                    </div>
-                </div>
-                <div class="media text-muted pt-3">
-                    <div class="mr-2 dataitemimage"></div>
-                    <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
-                        <div class="d-flex justify-content-between align-items-center w-100">
-                            <strong><a class="text-secondary" href="#">Forest001</a></strong>
-                            <div>
-                                <a class="text-secondary" href="#">Delete</a>
-                                /
-                                <a class="text-secondary" href="#">Rename</a>
-                            </div>
-                        </div>
-                        <span class="d-block">森を歩く自動テスト</span>
-                    </div>
-                </div>
-                <div class="media text-muted pt-3">
-                    <div class="mr-2 dataitemimage"></div>
-                    <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
-                        <div class="d-flex justify-content-between align-items-center w-100">
-                            <strong><a class="text-secondary" href="#">Forest001</a></strong>
-                            <div>
-                                <a class="text-secondary" href="#">Delete</a>
-                                /
-                                <a class="text-secondary" href="#">Rename</a>
-                            </div>
-                        </div>
-                        <span class="d-block">森を歩く自動テスト</span>
-                    </div>
-                </div>
-                <div class="media text-muted pt-3">
-                    <div class="mr-2 dataitemimage"></div>
-                    <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
-                        <div class="d-flex justify-content-between align-items-center w-100">
-                            <strong><a class="text-secondary" href="#">Forest001</a></strong>
-                            <div>
-                                <a class="text-secondary" href="#">Delete</a>
-                                /
-                                <a class="text-secondary" href="#">Rename</a>
-                            </div>
-                        </div>
-                        <span class="d-block">森を歩く自動テスト</span>
-                    </div>
-                </div>
-                <div class="media text-muted pt-3">
-                    <div class="mr-2 dataitemimage"></div>
-                    <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
-                        <div class="d-flex justify-content-between align-items-center w-100">
-                            <strong><a class="text-secondary" href="#">Forest001</a></strong>
-                            <div>
-                                <a class="text-secondary" href="#">Delete</a>
-                                /
-                                <a class="text-secondary" href="#">Rename</a>
-                            </div>
-                        </div>
-                        <span class="d-block">森を歩く自動テスト</span>
-                    </div>
-                </div>
+                {% endfor %}
             </div>
     </main>
 
