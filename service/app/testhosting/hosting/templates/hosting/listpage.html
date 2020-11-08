@@ -15,32 +15,29 @@
     <title>TestCase</title>
 
     <style>
-        .itemimage {
-            width: 32px;
-            height: 32px;
-        }
-
         .forlderitemimage {
-            width: 32px;
-            height: 32px;
+            width: 2em;
+            height: 2em;
             background-image:url("{% static 'hosting/folder.svg' %}");
-            background-repeat:  no-repeat;
+            background-repeat: no-repeat;
             background-size: 100%;
         }
+
         .dataitemimage {
-            width: 32px;
-            height: 32px;
+            width: 2em;
+            height: 2em;
             background-image:url("{% static 'hosting/file-earmark-text.svg' %}");
-            background-repeat:  no-repeat;
+            background-repeat: no-repeat;
             background-size: 100%;
         }
 
 
-        .add_icon{
-            transform:scale(1,1);
+        .add_icon {
+            transform: scale(1, 1);
         }
-        .add_icon:hover{
-            transform:scale(1.1,1.1);
+
+        .add_icon:hover {
+            transform: scale(1.1, 1.1);
         }
     </style>
 </head>
@@ -56,11 +53,11 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <ul class="navbar-nav mr-auto">
-                  <li class="nav-item">
-                    <a class="nav-link" href="#">Help</a>
-                  </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Help</a>
+                    </li>
                 </ul>
-              </div>
+            </div>
         </nav>
     </header>
 
@@ -71,11 +68,13 @@
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         {% for breadcrumb_item in breadcrumb_items %}
-                            {% if breadcrumb_item.is_active %}
-                            <li class="breadcrumb-item active" aria-current="page">{{ breadcrumb_item.name }}</a></li>
-                            {% else %}
-                            <li class="breadcrumb-item"><a href="{% url 'hosting:index' %}?path={{ breadcrumb_item.url_param }}">{{ breadcrumb_item.name }}</a></li>
-                            {% endif %}
+                        {% if breadcrumb_item.is_active %}
+                        <li class="breadcrumb-item active" aria-current="page">{{ breadcrumb_item.name }}</a></li>
+                        {% else %}
+                        <li class="breadcrumb-item"><a
+                                href="{% url 'hosting:index' %}?path={{ breadcrumb_item.url_param }}">{{ breadcrumb_item.name }}</a>
+                        </li>
+                        {% endif %}
                         {% endfor %}
                     </ol>
                 </nav>
@@ -83,35 +82,107 @@
             <div class="my-3 p-3 bg-white rounded shadow-sm">
                 <div class="d-flex justify-content-between align-items-center w-100 border-bottom border-gray">
                     <h6>Items</h6>
-                    <a href="#">
+                    <a data-toggle="modal" data-target="#createModal">
                         <img class="mr-2 add_icon" src="{% static 'hosting/plus-square.svg' %}">
                     </a>
                 </div>
-          
+
                 {% for list_item in list_items %}
-                    <div class="media text-muted pt-3">
-                        {% if list_item.is_directory %}                        
-                        <div class="mr-2 forlderitemimage"></div>
-                        {% else %}
-                        <div class="mr-2 dataitemimage"></div>
-                        {% endif %}
-                        <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
-                            <div class="d-flex justify-content-between align-items-center w-100">
-                                {% if list_item.is_directory %}
-                                <strong class="text-gray-dark"><a class="text-secondary" href="{% url 'hosting:index' %}?path={{ list_item.path_for_url_param }}">{{ list_item.name }}</a></strong>
-                                {% else %}
-                                <strong class="text-gray-dark"><a class="text-secondary" href="{% url 'hosting:edit' %}?path={{ list_item.path_for_url_param }}">{{ list_item.name }}</a></strong>
-                                {% endif %}
-                                <div>
-                                    <a class="text-secondary" href="#">Delete</a>
-                                    /
-                                    <a class="text-secondary" href="#">Rename</a>
-                                </div>
+                <div class="media text-muted pt-3">
+                    {% if list_item.is_directory %}
+                    <div class="mr-2 forlderitemimage"></div>
+                    {% else %}
+                    <div class="mr-2 dataitemimage"></div>
+                    {% endif %}
+                    <div class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            {% if list_item.is_directory %}
+                            <strong class="text-gray-dark"><a class="text-secondary"
+                                    href="{% url 'hosting:index' %}?path={{ list_item.path_for_url_param }}">{{ list_item.name }}</a></strong>
+                            {% else %}
+                            <strong class="text-gray-dark"><a class="text-secondary"
+                                    href="{% url 'hosting:edit' %}?path={{ list_item.path_for_url_param }}">{{ list_item.name }}</a></strong>
+                            <div>
+                                <button type="button" class="btn btn-outline-secondary btn-sm"
+                                    onclick='OnRenameButtonClick("{{ list_item.path_for_url_param }}");'>Rename</button>
+                                <button type="button" class="btn btn-outline-danger btn-sm"
+                                    onclick='OnDeleteButtonClick("{{ list_item.path_for_url_param }}");'>Delete</button>
                             </div>
-                            <span class="d-block">{{ list_item.summary }}</span>
+                            {% endif %}
+                        </div>
+                        <span class="d-block">{{ list_item.summary | linebreaksbr }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="modal fade" id="createModal" tabindex=" -1" role="dialog" aria-labelledby="basicModal"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4>テストデータ作成</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form id="createNewDataForm" action="{% url 'hosting:create'%}" method="post">
+                                {% csrf_token %}
+                                <label>テストケース名</label>
+                                <input type="text" class="form-control" name="testcaseName">
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">キャンセル</button>
+                            <button type="button" class="btn btn-primary" id="createNewData">作成</button>
                         </div>
                     </div>
-                {% endfor %}
+                </div>
+            </div>
+
+            <div class="modal fade" id="deleteModal" tabindex=" -1" role="dialog" aria-labelledby="basicModal"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4>削除しますか</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form id="deleteForm"" action=" {% url 'hosting:delete'%}" method="post">
+                                {% csrf_token %}
+                                <label>テストケース名</label>
+                                <input type="text" class="form-control" name="testcaseName" value="fuga" readonly
+                                    id="deleteTestcaseName">
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">キャンセル</button>
+                            <button type="button" class="btn btn-primary" id="deleteItem">削除</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="modal fade" id="renameModal" tabindex=" -1" role="dialog" aria-labelledby="basicModal"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4>名前変更しますか</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form id="renameForm"" action=" {% url 'hosting:rename'%}" method="post">
+                                {% csrf_token %}
+                                <label>テストケース名</label>
+                                <input type="text" class="form-control" name="testcaseName" id="renameTestcaseName">
+                                <!-- <input type="hidden" class="form-control" name="oldName" id="oldName"> -->
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">キャンセル</button>
+                            <button type="button" class="btn btn-primary" id="renameItem">削除</button>
+                        </div>
+                    </div>
+                </div>
             </div>
     </main>
 
@@ -123,6 +194,31 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
         integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
         crossorigin="anonymous"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#createNewData').click(function () {
+                $('#createNewDataForm').submit();
+            });
+            $('#deleteItem').click(function () {
+                $('#deleteForm').submit();
+            });
+            $('#renameItem').click(function () {
+                $('#renameForm').submit();
+            });
+        });
+
+        function OnDeleteButtonClick(path) {
+            $('#deleteTestcaseName').val(path);
+            $('#deleteModal').modal('show');
+        }
+
+        function OnRenameButtonClick(path) {
+            $('#renameTestcaseName').val(path);
+            $('#oldName').val(path);
+            $('#renameModal').modal('show');
+        }
+    </script>
 </body>
 
 </html>

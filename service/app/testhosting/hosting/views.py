@@ -2,7 +2,7 @@ import re
 from dataclasses import dataclass
 from typing import List
 
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 
@@ -15,6 +15,7 @@ class TestCaseListItem:
     path_for_url_param: str
     is_directory: bool
     summary: str
+
 
 @dataclass(frozen=True)
 class BreadcrumbItem:
@@ -54,13 +55,14 @@ def GetTestCaseListItems(cur_dir_path) -> List[TestCaseListItem]:
         exist = next((item for item in results if item.name == listitem_name), None)
         if exist is None:
             if is_directory:
-                list_item_summary = ""
+                list_item_summary = " \n "
             else:
                 # 概要が複数行の場合、先頭１行を表示させる
-                list_item_summary = testcase.summary.splitlines()[0]
+                list_item_summary = testcase.summary.splitlines()[0] + f'\nテストパス名:{cur_dir_path}/{listitem_name}'
             results.append(TestCaseListItem(listitem_name, f'{cur_dir_path}/{listitem_name}', is_directory, list_item_summary))
 
     return results
+
 
 def GetBreadcrumbItems(cur_dir_path) -> List[BreadcrumbItem]:
     items = cur_dir_path.split('/')
@@ -75,8 +77,9 @@ def GetBreadcrumbItems(cur_dir_path) -> List[BreadcrumbItem]:
         else:
             url_param += f'/{item}'
             result.append(BreadcrumbItem(item, url_param, num_item == index))
-    
+
     return result
+
 
 def index(request):
     if 'path' in request.GET:
@@ -87,8 +90,8 @@ def index(request):
     list_items = GetTestCaseListItems(cur_dir)
     breadcrumb_items = GetBreadcrumbItems(cur_dir)
     params = {
-        'list_items' : list_items,
-        'breadcrumb_items' : breadcrumb_items
+        'list_items': list_items,
+        'breadcrumb_items': breadcrumb_items
     }
 
     return render(request, 'hosting/listpage.html', params)
@@ -110,13 +113,14 @@ def edit_get(request):
     backurl_path = breadcrumb_items[-2].url_param
 
     params = {
-        'breadcrumb_items' : breadcrumb_items,
-        'summary' : testcase_data.summary,
-        'data' : testcase_data.testcase_data,
-        'backurl_path' : backurl_path,
-        'cur_path' : path,
+        'breadcrumb_items': breadcrumb_items,
+        'summary': testcase_data.summary,
+        'data': testcase_data.testcase_data,
+        'backurl_path': backurl_path,
+        'cur_path': path,
     }
     return render(request, 'hosting/editpage.html', params)
+
 
 def edit_post(request):
     testcase_data = get_object_or_404(TestCase, title_path=request.GET['path'])
@@ -131,6 +135,7 @@ def edit_post(request):
     redirect_uri = reverse('hosting:index') + f'?path={backurl_path}'
     return HttpResponseRedirect(redirect_uri)
 
+
 def edit(request):
     if request.method == 'GET':
         return edit_get(request)
@@ -138,4 +143,24 @@ def edit(request):
         return edit_post(request)
 
 
+def is_valid_new_name(name: str) -> bool:
+    # 同じ名前のテストケースが存在する場合は無効
+    TestCase.objects.get()
+    return True
 
+
+def create(request):
+    if request.method == 'POST':
+        new_name = request.POST['testcaseName']
+        if is_valid_new_name(new_name):
+            return HttpResponse(request.POST['testcaseName'])
+        else:
+            return HttpResponse('無効な名前のため作成に失敗しました')
+    else:
+        return HttpResponseNotFound()
+
+def delete(request):
+    return HttpResponseRedirect(reverse('hosting:index'))
+
+def rename(request):
+    return HttpResponseRedirect(reverse('hosting:index'))

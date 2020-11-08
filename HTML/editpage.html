@@ -66,15 +66,58 @@
           </form>
         </div>
       </div>
+
+      <!-- モーダルを開くボタン・リンク -->
+      <div class="container">
+        <div class="row my-3">
+          <h1>モーダルを開く</h1>
+        </div>
+        <div class="row mb-5">
+          <div class="col-2">
+            <button type="button" class="btn btn-primary mb-12" data-toggle="modal"
+              data-target="#testModal">ボタンで開く</button>
+          </div>
+          <div class="col-2">
+            <a class="btn btn-primary" data-toggle="modal" data-target="#testModal">リンクボタンで開く</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ボタン・リンククリック後に表示される画面の内容 -->
+      <div class="modal fade" id="createModal"" tabindex="-1" role="dialog" aria-labelledby="basicModal"　aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4>テストデータ作成</h4>
+              </h4>
+            </div>
+            <div class="modal-body">
+              <form>
+                <label>テストケース名</label>
+                <input type="text" class="form-control">
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">キャンセル</button>
+              <button type="button" class="btn btn-primary">作成</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </main>
 
   <!-- Optional JavaScript -->
   <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-  <script src="https://pagecdn.io/lib/ace/1.4.12/ace.min.js"></script> 
-  <script src="https://pagecdn.io/lib/ace/1.4.12/theme-monokai.min.js"></script> 
-  
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+    integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+    crossorigin="anonymous"></script>
+  <script src="https://pagecdn.io/lib/ace/1.4.12/ace.min.js"></script>
+  <script src="https://pagecdn.io/lib/ace/1.4.12/theme-monokai.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+    integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+    crossorigin="anonymous"></script>
+
   <script>
     var editor;
     $(document).ready(function () {
@@ -88,7 +131,7 @@
       // editor.setPrintMarginColumn(10)
       // editor.getSession().setMode("ace/mode/html");
     });
-    $(window).resize(function() {
+    $(window).resize(function () {
       hsize = $(window).height();
       $("#editor").css("height", hsize * 0.8 + "px");
       editor.resize();
