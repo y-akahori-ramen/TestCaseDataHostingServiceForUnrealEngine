@@ -54,11 +54,16 @@ def GetTestCaseListItems(cur_dir_path) -> List[TestCaseListItem]:
         # リスト表示画面では１アイテムだけ表示すれば良いので１つだけ登録するようにする。
         exist = next((item for item in results if item.name == listitem_name), None)
         if exist is None:
+            list_item_summary = ""
             if is_directory:
                 list_item_summary = " \n "
             else:
                 # 概要が複数行の場合、先頭１行を表示させる
-                list_item_summary = testcase.summary.splitlines()[0] + f'\nテストパス名:{cur_dir_path}/{listitem_name}'
+                if len(testcase.summary) > 0:
+                    list_item_summary = testcase.summary.splitlines()[0]
+                    
+                list_item_summary += f'\nテストパス名:{cur_dir_path}/{listitem_name}'
+
             results.append(TestCaseListItem(listitem_name, f'{cur_dir_path}/{listitem_name}', is_directory, list_item_summary))
 
     return results
@@ -143,24 +148,61 @@ def edit(request):
         return edit_post(request)
 
 
-def is_valid_new_name(name: str) -> bool:
-    # 同じ名前のテストケースが存在する場合は無効
-    TestCase.objects.get()
-    return True
+@dataclass(frozen=True)
+class CheckNameResult:
+    is_valid: bool
+    desc: str
 
+def check_valid_new_name(name: str) -> CheckNameResult:
+    if len(name) == 0:
+        return CheckNameResult(False, '名前が空です')
+    # 同じ名前のテストケースが存在する場合は無効
+    if len(TestCase.objects.filter(title_path__startswith=name)) > 0:
+        return CheckNameResult(False, f'同じ名前のテストケースが存在します\n{name}')
+    # 一番先頭が/始まりで末尾は/じゃないこと。/と/の間に文字があること
+    if re.match(r'^(/[\w-]+)*$', name) is None:
+        return CheckNameResult(False, f'名前のフォーマットが不正です\n{name}')
+
+    # 作ろうとしている名前のパスの一部がテストケースデータそのものを含む場合はエラー
+    # 作ろうとしている側はディレクトリとしてその名前が機能するようにしたいが、すでにデータの実体として存在しているためエラー
+    words = name.split('/')[1:]
+    path = ""
+    for word in words:
+        path = path + "/" + word
+        is_testcase_data = len(TestCase.objects.filter(title_path__startswith=path)) == 1
+        if is_testcase_data:
+            return CheckNameResult(False, f'作ろうとしている名前のパスの一部がテストケースデータとして存在します\n{name}')
+    return CheckNameResult(True,'')
 
 def create(request):
     if request.method == 'POST':
         new_name = request.POST['testcaseName']
-        if is_valid_new_name(new_name):
-            return HttpResponse(request.POST['testcaseName'])
+        check_result = check_valid_new_name(new_name)
+        if check_result.is_valid:
+            new_testcase = TestCase(title_path=new_name)
+            new_testcase.save()
+            redirect_uri = reverse('hosting:edit') + f'?path={new_name}'
+            return HttpResponseRedirect(redirect_uri)
         else:
-            return HttpResponse('無効な名前のため作成に失敗しました')
+            params = {
+                'error_msg': check_result.desc,
+            }
+            return render(request, 'hosting/errorpage.html', params)
     else:
         return HttpResponseNotFound()
 
+
 def delete(request):
-    return HttpResponseRedirect(reverse('hosting:index'))
+    if request.method == 'POST':
+        return HttpResponse('Delete')
+    else:
+        return HttpResponseNotFound()
+     # return HttpResponseRedirect(reverse('hosting:index'))
+
 
 def rename(request):
-    return HttpResponseRedirect(reverse('hosting:index'))
+    if request.method == 'POST':
+        return HttpResponse('Rename')
+    else:
+        return HttpResponseNotFound()
+    # return HttpResponseRedirect(reverse('hosting:index'))
