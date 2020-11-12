@@ -127,7 +127,7 @@
                             <form id="createNewDataForm" action="{% url 'hosting:create'%}" method="post">
                                 {% csrf_token %}
                                 <label>テストケース名</label>
-                                <input type="text" class="form-control" name="testcaseName">
+                                <input type="text" class="form-control" name="testcaseName" value='{{ create_initial_testcasename }}'>
                             </form>
                         </div>
                         <div class="modal-footer">
@@ -149,7 +149,7 @@
                             <form id="deleteForm"" action=" {% url 'hosting:delete'%}" method="post">
                                 {% csrf_token %}
                                 <label>テストケース名</label>
-                                <input type="text" class="form-control" name="testcaseName" value="fuga" readonly
+                                <input type="text" class="form-control" name="testcaseName" readonly
                                     id="deleteTestcaseName">
                             </form>
                         </div>
@@ -179,7 +179,7 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">キャンセル</button>
-                            <button type="button" class="btn btn-primary" id="renameItem">削除</button>
+                            <button type="button" class="btn btn-primary" id="renameItem">変更</button>
                         </div>
                     </div>
                 </div>

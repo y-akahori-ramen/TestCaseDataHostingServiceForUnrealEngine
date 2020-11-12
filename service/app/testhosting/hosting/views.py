@@ -61,7 +61,7 @@ def GetTestCaseListItems(cur_dir_path) -> List[TestCaseListItem]:
                 # 概要が複数行の場合、先頭１行を表示させる
                 if len(testcase.summary) > 0:
                     list_item_summary = testcase.summary.splitlines()[0]
-                    
+
                 list_item_summary += f'\nテストパス名:{cur_dir_path}/{listitem_name}'
 
             results.append(TestCaseListItem(listitem_name, f'{cur_dir_path}/{listitem_name}', is_directory, list_item_summary))
@@ -96,7 +96,8 @@ def index(request):
     breadcrumb_items = GetBreadcrumbItems(cur_dir)
     params = {
         'list_items': list_items,
-        'breadcrumb_items': breadcrumb_items
+        'breadcrumb_items': breadcrumb_items,
+        'create_initial_testcasename': cur_dir + '/',
     }
 
     return render(request, 'hosting/listpage.html', params)
@@ -153,11 +154,17 @@ class CheckNameResult:
     is_valid: bool
     desc: str
 
-def check_valid_new_name(name: str) -> CheckNameResult:
+
+def check_valid_new_name(name: str, ignore_name: str) -> CheckNameResult:
     if len(name) == 0:
         return CheckNameResult(False, '名前が空です')
     # 同じ名前のテストケースが存在する場合は無効
-    if len(TestCase.objects.filter(title_path__startswith=name)) > 0:
+    if ignore_name is None:
+        testcases = TestCase.objects
+    else:
+        testcases = TestCase.objects.exclude(title_path=ignore_name)
+
+    if len(testcases.filter(title_path__startswith=name)) > 0:
         return CheckNameResult(False, f'同じ名前のテストケースが存在します\n{name}')
     # 一番先頭が/始まりで末尾は/じゃないこと。/と/の間に文字があること
     if re.match(r'^(/[\w-]+)*$', name) is None:
@@ -169,15 +176,16 @@ def check_valid_new_name(name: str) -> CheckNameResult:
     path = ""
     for word in words:
         path = path + "/" + word
-        is_testcase_data = len(TestCase.objects.filter(title_path__startswith=path)) == 1
+        is_testcase_data = len(testcases.filter(title_path=path)) == 1
         if is_testcase_data:
-            return CheckNameResult(False, f'作ろうとしている名前のパスの一部がテストケースデータとして存在します\n{name}')
-    return CheckNameResult(True,'')
+            return CheckNameResult(False, f'作ろうとしている名前のパスの一部がテストケースデータとして存在します\n{name}\n{path}')
+    return CheckNameResult(True, '')
+
 
 def create(request):
     if request.method == 'POST':
         new_name = request.POST['testcaseName']
-        check_result = check_valid_new_name(new_name)
+        check_result = check_valid_new_name(new_name, None)
         if check_result.is_valid:
             new_testcase = TestCase(title_path=new_name)
             new_testcase.save()
@@ -194,7 +202,10 @@ def create(request):
 
 def delete(request):
     if request.method == 'POST':
-        return HttpResponse('Delete')
+        delete_name = request.POST['testcaseName']
+        testcase_data = get_object_or_404(TestCase, title_path=delete_name)
+        testcase_data.delete()
+        return HttpResponseRedirect(reverse('hosting:index'))
     else:
         return HttpResponseNotFound()
      # return HttpResponseRedirect(reverse('hosting:index'))
@@ -202,7 +213,20 @@ def delete(request):
 
 def rename(request):
     if request.method == 'POST':
-        return HttpResponse('Rename')
+        new_name = request.POST['testcaseName']
+        old_name = request.POST['oldName']
+        check_result = check_valid_new_name(new_name, old_name)
+        if check_result.is_valid:
+            testcase_data = get_object_or_404(TestCase, title_path=old_name)
+            testcase_data.title_path = new_name
+            testcase_data.save()
+            return HttpResponseRedirect(reverse('hosting:index'))
+        else:
+            params = {
+                'error_msg': check_result.desc,
+            }
+            return render(request, 'hosting/errorpage.html', params)
+
     else:
         return HttpResponseNotFound()
     # return HttpResponseRedirect(reverse('hosting:index'))
