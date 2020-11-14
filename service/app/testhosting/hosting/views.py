@@ -232,33 +232,97 @@ def rename(request):
         return HttpResponseNotFound()
 
 
+class TestCaseDataConverter:
+    @staticmethod
+    def covert(testcase_data: str) -> list[str]:
+        """テストケース文字列をテストコマンドに変換する
+
+        文字列中のコメントや不用な空白を取り除きコマンド文字列のリストに変換する。
+        コマンドフォーマットとして正しくないものがある場合例外を送出します。
+
+        Args:
+            testcase_data (str): テストケースデータ文字列
+
+        Returns:
+            List(str): コマンド文字列リスト
+        """
+        commands = []
+
+        for line in testcase_data.splitlines():
+            command = TestCaseDataConverter.__convert_command(line)
+            if command is not None:
+                commands.append(command)
+
+        return commands
+
+    __remove_head_space_pattern = re.compile(r'^\s*(\S.*)$')
+
+    @staticmethod
+    def __convert_command(command_str: str):
+        comment_str = "//"
+        comment_str_idx = command_str.find(comment_str)
+        if comment_str_idx >= 0:
+            comment_removed_line = command_str[:comment_str_idx]
+        else:
+            comment_removed_line = command_str
+
+        if len(comment_removed_line) == 0:
+            return None
+        else:
+            # 行頭の空白を取り除く
+            match = TestCaseDataConverter.__remove_head_space_pattern.match(comment_removed_line)
+            if match is None:
+                # 空白のみの行のためスキップ
+                return None
+            else:
+                normalized_command_str = match.group(1)
+                return normalized_command_str
+
+
 def get_testdata_for_json(name: str) -> {}:
     result_info = {
         'result': True,
         'desc': None,
         'name': name,
     }
-    commands = []
 
     query_result = TestCase.objects.filter(title_path=name)
 
     if not query_result.exists():
         result_info['result'] = False
         result_info['desc'] = 'テストケースが存在していません'
-        return {'result': result_info, 'commands': commands}
+        return {'result': result_info, 'commands': []}
 
     if len(query_result) > 1:
         result_info['result'] = False
-        result_info['desc'] = '同名のテストケースが複数存在しませう'
-        return {'result': result_info, 'commands': commands}
+        result_info['desc'] = '同名のテストケースが複数存在します'
+        return {'result': result_info, 'commands': []}
 
-    for line in query_result[0].testcase_data.splitlines():
-        # コメントアウトはスキップ
-        if line.startswith('//'):
-            continue
+    raw_commands = TestCaseDataConverter.covert(query_result[0].testcase_data)
+    include_cmd_pattern = re.compile(r'^include\s+-path\s+(\S+)')
 
-        # TODO includeコマンドだったらinclude処理
-        commands.append(line)
+    commands = []
+    for command in raw_commands:
+        if command.startswith('include'):
+            include_match = include_cmd_pattern.match(command)
+            if include_match is None:
+                result_info['result'] = False
+                result_info['desc'] = f'includeコマンドフォーマットエラーです Command: {command}'
+                return {'result': result_info, 'commands': []}
+            else:
+                # include指定されているテストケースのコマンドを取得
+                include_path = include_match.group(1)
+                include_result = get_testdata_for_json(include_path)
+                include_result_info = include_result['result']
+                if include_result_info['result'] == True:
+                    commands += include_result['commands']
+                else:
+                    include_error_desc = include_result_info['desc']
+                    result_info['result'] = False
+                    result_info['desc'] = f'include先のテストケースでエラーが発生しました Command: {command}\ninclude先エラー:{include_error_desc}'
+                    return {'result': result_info, 'commands': []}
+        else:
+            commands.append(command)
 
     result_info['desc'] = '成功しました'
     return {'result': result_info, 'commands': commands}
@@ -270,4 +334,6 @@ def get_data(request):
     else:
         path = ''
 
-    return JsonResponse(get_testdata_for_json(path))
+    responcse = get_testdata_for_json(path)
+    print(responcse)
+    return JsonResponse(responcse)
