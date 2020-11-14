@@ -5,6 +5,7 @@ from typing import List
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
+from django.http.response import JsonResponse
 
 from .models import TestCase
 
@@ -64,7 +65,8 @@ def GetTestCaseListItems(cur_dir_path) -> List[TestCaseListItem]:
 
                 list_item_summary += f'\nテストパス名:{cur_dir_path}/{listitem_name}'
 
-            results.append(TestCaseListItem(listitem_name, f'{cur_dir_path}/{listitem_name}', is_directory, list_item_summary))
+            results.append(TestCaseListItem(
+                listitem_name, f'{cur_dir_path}/{listitem_name}', is_directory, list_item_summary))
 
     return results
 
@@ -164,7 +166,7 @@ def check_valid_new_name(name: str, ignore_name: str) -> CheckNameResult:
     else:
         testcases = TestCase.objects.exclude(title_path=ignore_name)
 
-    if len(testcases.filter(title_path__startswith=name)) > 0:
+    if testcases.filter(title_path__startswith=name).exists():
         return CheckNameResult(False, f'同じ名前のテストケースが存在します\n{name}')
     # 一番先頭が/始まりで末尾は/じゃないこと。/と/の間に文字があること
     if re.match(r'^(/[\w-]+)*$', name) is None:
@@ -208,7 +210,6 @@ def delete(request):
         return HttpResponseRedirect(reverse('hosting:index'))
     else:
         return HttpResponseNotFound()
-     # return HttpResponseRedirect(reverse('hosting:index'))
 
 
 def rename(request):
@@ -229,4 +230,44 @@ def rename(request):
 
     else:
         return HttpResponseNotFound()
-    # return HttpResponseRedirect(reverse('hosting:index'))
+
+
+def get_testdata_for_json(name: str) -> {}:
+    result_info = {
+        'result': True,
+        'desc': None,
+        'name': name,
+    }
+    commands = []
+
+    query_result = TestCase.objects.filter(title_path=name)
+
+    if not query_result.exists():
+        result_info['result'] = False
+        result_info['desc'] = 'テストケースが存在していません'
+        return {'result': result_info, 'commands': commands}
+
+    if len(query_result) > 1:
+        result_info['result'] = False
+        result_info['desc'] = '同名のテストケースが複数存在しませう'
+        return {'result': result_info, 'commands': commands}
+
+    for line in query_result[0].testcase_data.splitlines():
+        # コメントアウトはスキップ
+        if line.startswith('//'):
+            continue
+
+        # TODO includeコマンドだったらinclude処理
+        commands.append(line)
+
+    result_info['desc'] = '成功しました'
+    return {'result': result_info, 'commands': commands}
+
+
+def get_data(request):
+    if 'path' in request.GET:
+        path = request.GET['path']
+    else:
+        path = ''
+
+    return JsonResponse(get_testdata_for_json(path))
