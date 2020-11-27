@@ -237,7 +237,7 @@ def rename(request):
 
 class TestCaseDataConverter:
     @staticmethod
-    def covert(testcase_data: str) -> list[str]:
+    def covert(testcase_data: str):
         """テストケース文字列をテストコマンドに変換する
 
         文字列中のコメントや不用な空白を取り除きコマンド文字列のリストに変換する。
