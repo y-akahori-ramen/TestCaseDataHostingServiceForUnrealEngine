@@ -7,6 +7,9 @@ services:
       - django_statics:/home/static:rw  # collectstaticで静的コンテンツを収集する先のボリューム指定
     environment:
       STATIC_ROOT: '/home/static' # settings.pyでSTATIC_ROOTを環境変数"STATIC_ROOT"で指定している。マウントしたdjang_staticsに収集するように設定
+      SPUER_USER_NAME: admin # 管理用ユーザーアカウント名
+      SUPER_USER_EMAIL: admin@example.com # 管理用ユーザーアカウントメールアドレス
+      DJANGO_SUPERUSER_PASSWORD: admin # 管理用ユーザーパスワード
     entrypoint:
       - /home/data/entrypoint.sh # コンテナ起動後に静的コンテンツ収集、マイグレーション、サーバー起動を行うシェルスクリプト指定
   nginx:
