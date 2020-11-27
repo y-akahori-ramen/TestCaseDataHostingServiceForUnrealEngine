@@ -8,5 +8,5 @@ urlpatterns = [
     path('create/', views.create, name='create'),
     path('delete/', views.delete, name='delete'),
     path('rename/', views.rename, name='rename'),
-    path('get/', views.get_data, name='get'),
+    path('json/', views.get_json_data, name='json'),
 ]

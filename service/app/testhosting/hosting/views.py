@@ -7,6 +7,9 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.http.response import JsonResponse
 
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework import permissions
 from .models import TestCase
 
 
@@ -327,13 +330,14 @@ def get_testdata_for_json(name: str) -> {}:
     result_info['desc'] = '成功しました'
     return {'result': result_info, 'commands': commands}
 
-
-def get_data(request):
-    if 'path' in request.GET:
-        path = request.GET['path']
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def get_json_data(request):
+    if 'path' in request.query_params:
+        path = request.query_params['path']
     else:
         path = ''
 
     responcse = get_testdata_for_json(path)
     print(responcse)
-    return JsonResponse(responcse)
+    return Response(responcse)
