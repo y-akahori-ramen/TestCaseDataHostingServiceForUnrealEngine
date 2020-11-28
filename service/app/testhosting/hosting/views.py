@@ -7,7 +7,7 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.http.response import JsonResponse
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -115,6 +115,10 @@ def signin(request):
             return render(request, 'hosting/signin.html')
     else:
         return render(request, 'hosting/signin.html')
+
+def signout(request):
+    logout(request)
+    return HttpResponseRedirect(reverse('hosting:signin'))
 
 @login_required(login_url='/signin')
 def index(request):
