@@ -6,6 +6,8 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.http.response import JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -90,6 +92,29 @@ def GetBreadcrumbItems(cur_dir_path) -> List[BreadcrumbItem]:
 
     return result
 
+def signin(request):
+    if request.method == 'GET':
+        if request.user.is_authenticated:
+            return HttpResponseRedirect(reverse('hosting:index'))
+        else:
+            return render(request, 'hosting/signin.html')
+    elif request.method == 'POST':
+        username = request.POST['inputUser']
+        userpassword = request.POST['inputPassword']
+        user = authenticate(request,username=username, password=userpassword)
+    
+        if user is not None:
+            login(request,user=user)
+            # ログインしていない状態でページにアクセスした場合このビューが表示され、その場合はnextに戻り先が入っている
+            # nextが存在すればそちらへ移動し、nextがなければトップページに移動
+            if 'next' in request.GET:
+                return HttpResponseRedirect(request.GET['next'])
+            else:
+                return HttpResponseRedirect(reverse('hosting:index'))
+        else:
+            return render(request, 'hosting/signin.html')
+    else:
+        return render(request, 'hosting/signin.html')
 
 def index(request):
     if 'path' in request.GET:
