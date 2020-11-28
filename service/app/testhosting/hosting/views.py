@@ -116,6 +116,7 @@ def signin(request):
     else:
         return render(request, 'hosting/signin.html')
 
+@login_required(login_url='/signin')
 def index(request):
     if 'path' in request.GET:
         cur_dir = request.GET['path']
@@ -132,7 +133,7 @@ def index(request):
 
     return render(request, 'hosting/listpage.html', params)
 
-
+@login_required(login_url='/signin')
 def edit_get(request):
     if 'path' in request.GET:
         path = request.GET['path']
@@ -172,6 +173,7 @@ def edit_post(request):
     return HttpResponseRedirect(redirect_uri)
 
 
+@login_required(login_url='/signin')
 def edit(request):
     if request.method == 'GET':
         return edit_get(request)
@@ -212,6 +214,7 @@ def check_valid_new_name(name: str, ignore_name: str) -> CheckNameResult:
     return CheckNameResult(True, '')
 
 
+@login_required(login_url='/signin')
 def create(request):
     if request.method == 'POST':
         new_name = request.POST['testcaseName']
@@ -230,6 +233,7 @@ def create(request):
         return HttpResponseNotFound()
 
 
+@login_required(login_url='/signin')
 def delete(request):
     if request.method == 'POST':
         delete_name = request.POST['testcaseName']
@@ -240,6 +244,7 @@ def delete(request):
         return HttpResponseNotFound()
 
 
+@login_required(login_url='/signin')
 def rename(request):
     if request.method == 'POST':
         new_name = request.POST['testcaseName']
