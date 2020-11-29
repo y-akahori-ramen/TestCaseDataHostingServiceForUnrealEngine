@@ -11,7 +11,7 @@ from django.contrib.auth import authenticate, login, logout
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from rest_framework import permissions
+from rest_framework import permissions, status
 from .models import TestCase
 
 
@@ -315,25 +315,22 @@ class TestCaseDataConverter:
                 normalized_command_str = match.group(1)
                 return normalized_command_str
 
+@dataclass(frozen=True)
+class GetTestCaseResult:
+    success: bool
+    name: str
+    desc: str
+    commands: list[str]
 
-def get_testdata_for_json(name: str) -> {}:
-    result_info = {
-        'result': True,
-        'desc': None,
-        'name': name,
-    }
 
+def get_testdata(name: str) -> GetTestCaseResult:
     query_result = TestCase.objects.filter(title_path=name)
 
     if not query_result.exists():
-        result_info['result'] = False
-        result_info['desc'] = 'テストケースが存在していません'
-        return {'result': result_info, 'commands': []}
+        return GetTestCaseResult(False, name, 'テストケースが存在していません', [])
 
     if len(query_result) > 1:
-        result_info['result'] = False
-        result_info['desc'] = '同名のテストケースが複数存在します'
-        return {'result': result_info, 'commands': []}
+        return GetTestCaseResult(False, name, '同名のテストケースが複数存在します', [])
 
     raw_commands = TestCaseDataConverter.covert(query_result[0].testcase_data)
     include_cmd_pattern = re.compile(r'^include\s+-path\s+(\S+)')
@@ -343,26 +340,20 @@ def get_testdata_for_json(name: str) -> {}:
         if command.startswith('include'):
             include_match = include_cmd_pattern.match(command)
             if include_match is None:
-                result_info['result'] = False
-                result_info['desc'] = f'includeコマンドフォーマットエラーです Command: {command}'
-                return {'result': result_info, 'commands': []}
+                return GetTestCaseResult(False, name,  f'includeコマンドフォーマットエラーです Command: {command}', [])
             else:
                 # include指定されているテストケースのコマンドを取得
                 include_path = include_match.group(1)
-                include_result = get_testdata_for_json(include_path)
-                include_result_info = include_result['result']
-                if include_result_info['result'] == True:
-                    commands += include_result['commands']
+                include_result = get_testdata(include_path)
+                if include_result.success == True:
+                    commands += include_result.commands
                 else:
-                    include_error_desc = include_result_info['desc']
-                    result_info['result'] = False
-                    result_info['desc'] = f'include先のテストケースでエラーが発生しました Command: {command}\ninclude先エラー:{include_error_desc}'
-                    return {'result': result_info, 'commands': []}
+                    include_error_desc = include_result.desc
+                    error_desc = f'include先のテストケースでエラーが発生しました Command: {command}\ninclude先エラー:{include_error_desc}'
+                    return GetTestCaseResult(False, name, error_desc, [])
         else:
             commands.append(command)
-
-    result_info['desc'] = '成功しました'
-    return {'result': result_info, 'commands': commands}
+    return GetTestCaseResult(True, name, '成功しました', commands)
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
@@ -372,6 +363,13 @@ def get_json_data(request):
     else:
         path = ''
 
-    responcse = get_testdata_for_json(path)
-    print(responcse)
-    return Response(responcse)
+    result = get_testdata(path)
+    response = {
+        'commands': result.commands,
+        'message': result.desc
+    }
+
+    if result.success:
+        return Response(response)
+    else:
+        return Response(response, status=status.HTTP_400_BAD_REQUEST)
