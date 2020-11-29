@@ -320,7 +320,7 @@ class GetTestCaseResult:
     success: bool
     name: str
     desc: str
-    commands: list[str]
+    commands: List[str]
 
 
 def get_testdata(name: str) -> GetTestCaseResult:
