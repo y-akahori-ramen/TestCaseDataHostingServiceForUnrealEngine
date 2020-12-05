@@ -10,5 +10,6 @@ urlpatterns = [
     path('create/', views.create, name='create'),
     path('delete/', views.delete, name='delete'),
     path('rename/', views.rename, name='rename'),
-    path('json/', views.get_json_data, name='json'),
+    path('json/', views.get_json_data, name='data_json'),
+    path('list/', views.get_list, name='list_json'),
 ]

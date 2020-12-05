@@ -373,3 +373,16 @@ def get_json_data(request):
         return Response(response)
     else:
         return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def get_list(request):
+    """全テストケースの名前をJSONで取得します
+    """
+    testcase_names = []
+    testcases = TestCase.objects.all()
+    for testcase in testcases:
+        testcase_names.append(testcase.title_path)
+
+    return Response({'testcases': testcase_names})
