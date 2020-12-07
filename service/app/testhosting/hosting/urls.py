@@ -12,4 +12,5 @@ urlpatterns = [
     path('rename/', views.rename, name='rename'),
     path('json/', views.get_json_data, name='data_json'),
     path('list/', views.get_list, name='list_json'),
+    path('add/', views.add_testcase),
 ]

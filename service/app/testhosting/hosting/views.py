@@ -386,3 +386,69 @@ def get_list(request):
         testcase_names.append(testcase.title_path)
 
     return Response({'testcases': testcase_names, 'message': '成功しました'})
+
+
+@dataclass(frozen=True)
+class TestCaseData:
+    name: str
+    summary: str
+    testcase_data: str
+
+def convert_testcase_data(dist):
+    """ディクショナリからテストケースデータに変換する
+
+    ディクショナリ例
+    {'Commands': ['Command1', 'Command2', 'Command3'], 'Name': '/aaa/a/sample', 'Summary':'SummaryData'}
+    
+    Args:
+        dist : ディクショナリ
+
+    Returns:
+        [TestCaseData]: テストケースデータ。ディクショナリ内に必要なキーが無い場合はNoneを返します
+    """
+    if 'Name' in dist:
+        name = dist['Name']
+    else:
+        return None
+
+    if 'Commands' in dist:
+        commands = dist['Commands']
+        testcase_data = '\n'.join(commands)
+    else:
+        return None
+
+    if 'Summary' in dist:
+        summary = dist['Summary']
+    else:
+        summary = None
+    
+    return TestCaseData(name, summary, testcase_data)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def add_testcase(request):
+    """テストケースの追加、既存のテストケースへの追加の場合は更新扱いとなります。
+    """
+    print(request.data)
+
+    testcase_data = convert_testcase_data(request.data)
+    if testcase_data is None:
+        return Response({'message': '必要なデータが不足しています'}, status=status.HTTP_400_BAD_REQUEST)
+
+    checkname_result = check_valid_new_name(testcase_data.name, ignore_name=testcase_data.name)
+    if checkname_result.is_valid:
+        # 既存の名前が指定された場合は上書きとして機能させる
+        if TestCase.objects.filter(title_path=testcase_data.name).exists():
+            testcase = TestCase.objects.get(title_path=testcase_data.name)
+        else:
+            testcase = TestCase()
+
+        testcase.title_path = testcase_data.name
+        if testcase_data.summary is not None:
+            testcase.summary = testcase_data.summary            
+        testcase.testcase_data = testcase_data.testcase_data
+        testcase.save()
+        return Response({'message': '成功しました'})
+    else:
+        return Response({'message': checkname_result.desc}, status=status.HTTP_400_BAD_REQUEST)
