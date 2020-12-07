@@ -385,4 +385,4 @@ def get_list(request):
     for testcase in testcases:
         testcase_names.append(testcase.title_path)
 
-    return Response({'testcases': testcase_names})
+    return Response({'testcases': testcase_names, 'message': '成功しました'})
