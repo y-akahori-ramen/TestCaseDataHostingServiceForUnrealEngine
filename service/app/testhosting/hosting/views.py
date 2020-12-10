@@ -24,10 +24,10 @@ def signin(request):
     elif request.method == 'POST':
         username = request.POST['inputUser']
         userpassword = request.POST['inputPassword']
-        user = authenticate(request,username=username, password=userpassword)
-    
+        user = authenticate(request, username=username, password=userpassword)
+
         if user is not None:
-            login(request,user=user)
+            login(request, user=user)
             # ログインしていない状態でページにアクセスした場合このビューが表示され、その場合はnextに戻り先が入っている
             # nextが存在すればそちらへ移動し、nextがなければトップページに移動
             if 'next' in request.GET:
@@ -39,9 +39,11 @@ def signin(request):
     else:
         return render(request, 'hosting/signin.html')
 
+
 def signout(request):
     logout(request)
     return HttpResponseRedirect(reverse('hosting:signin'))
+
 
 @login_required(login_url='/signin')
 def index(request):
@@ -59,6 +61,7 @@ def index(request):
     }
 
     return render(request, 'hosting/listpage.html', params)
+
 
 @login_required(login_url='/signin')
 def edit_get(request):
@@ -238,6 +241,7 @@ class TestCaseDataConverter:
                 normalized_command_str = match.group(1)
                 return normalized_command_str
 
+
 @dataclass(frozen=True)
 class GetTestCaseResult:
     success: bool
@@ -278,6 +282,7 @@ def get_testdata(name: str) -> GetTestCaseResult:
             commands.append(command)
     return GetTestCaseResult(True, name, '成功しました', commands)
 
+
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def get_json_data(request):
@@ -317,12 +322,13 @@ class TestCaseData:
     summary: str
     testcase_data: str
 
+
 def convert_testcase_data(dist):
     """ディクショナリからテストケースデータに変換する
 
     ディクショナリ例
     {'Commands': ['Command1', 'Command2', 'Command3'], 'Name': '/aaa/a/sample', 'Summary':'SummaryData'}
-    
+
     Args:
         dist : ディクショナリ
 
@@ -344,7 +350,7 @@ def convert_testcase_data(dist):
         summary = dist['Summary']
     else:
         summary = None
-    
+
     return TestCaseData(name, summary, testcase_data)
 
 
