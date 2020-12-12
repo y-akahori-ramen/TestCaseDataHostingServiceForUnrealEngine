@@ -14,6 +14,7 @@ from rest_framework.response import Response
 from rest_framework import permissions, status
 from .models import TestCase
 from .testcase import view_util
+from .testcase.data import GetTestCaseData
 
 def signin(request):
     if request.method == 'GET':
@@ -194,95 +195,6 @@ def rename(request):
     else:
         return HttpResponseNotFound()
 
-
-class TestCaseDataConverter:
-    @staticmethod
-    def covert(testcase_data: str):
-        """テストケース文字列をテストコマンドに変換する
-
-        文字列中のコメントや不用な空白を取り除きコマンド文字列のリストに変換する。
-        コマンドフォーマットとして正しくないものがある場合例外を送出します。
-
-        Args:
-            testcase_data (str): テストケースデータ文字列
-
-        Returns:
-            List(str): コマンド文字列リスト
-        """
-        commands = []
-
-        for line in testcase_data.splitlines():
-            command = TestCaseDataConverter.__convert_command(line)
-            if command is not None:
-                commands.append(command)
-
-        return commands
-
-    __remove_head_space_pattern = re.compile(r'^\s*(\S.*)$')
-
-    @staticmethod
-    def __convert_command(command_str: str):
-        comment_str = "//"
-        comment_str_idx = command_str.find(comment_str)
-        if comment_str_idx >= 0:
-            comment_removed_line = command_str[:comment_str_idx]
-        else:
-            comment_removed_line = command_str
-
-        if len(comment_removed_line) == 0:
-            return None
-        else:
-            # 行頭の空白を取り除く
-            match = TestCaseDataConverter.__remove_head_space_pattern.match(comment_removed_line)
-            if match is None:
-                # 空白のみの行のためスキップ
-                return None
-            else:
-                normalized_command_str = match.group(1)
-                return normalized_command_str
-
-
-@dataclass(frozen=True)
-class GetTestCaseResult:
-    success: bool
-    name: str
-    desc: str
-    commands: List[str]
-
-
-def get_testdata(name: str) -> GetTestCaseResult:
-    query_result = TestCase.objects.filter(title_path=name)
-
-    if not query_result.exists():
-        return GetTestCaseResult(False, name, 'テストケースが存在していません', [])
-
-    if len(query_result) > 1:
-        return GetTestCaseResult(False, name, '同名のテストケースが複数存在します', [])
-
-    raw_commands = TestCaseDataConverter.covert(query_result[0].testcase_data)
-    include_cmd_pattern = re.compile(r'^include\s+-path\s+(\S+)')
-
-    commands = []
-    for command in raw_commands:
-        if command.startswith('include'):
-            include_match = include_cmd_pattern.match(command)
-            if include_match is None:
-                return GetTestCaseResult(False, name,  f'includeコマンドフォーマットエラーです Command: {command}', [])
-            else:
-                # include指定されているテストケースのコマンドを取得
-                include_path = include_match.group(1)
-                include_result = get_testdata(include_path)
-                if include_result.success == True:
-                    commands += include_result.commands
-                else:
-                    include_error_desc = include_result.desc
-                    error_desc = f'include先のテストケースでエラーが発生しました Command: {command}\ninclude先エラー:{include_error_desc}'
-                    return GetTestCaseResult(False, name, error_desc, [])
-        else:
-            commands.append(command)
-    return GetTestCaseResult(True, name, '成功しました', commands)
-
-
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def get_json_data(request):
@@ -291,17 +203,19 @@ def get_json_data(request):
     else:
         path = ''
 
-    result = get_testdata(path)
-    response = {
-        'commands': result.commands,
-        'message': result.desc
-    }
-
-    if result.success:
+    try:
+        commands = GetTestCaseData(path)
+        response = {
+            'commands': commands,
+            'message': '成功しました'
+        }
         return Response(response)
-    else:
+    except Exception as exp:
+        response = {
+            'commands': [],
+            'message': f'{exp}'
+        }
         return Response(response, status=status.HTTP_400_BAD_REQUEST)
-
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
