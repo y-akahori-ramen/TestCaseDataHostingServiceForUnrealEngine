@@ -14,7 +14,7 @@ from rest_framework.response import Response
 from rest_framework import permissions, status
 from .models import TestCase
 from .testcase import view_util
-from .testcase.data import get_testcase_commands
+from .testcase.data import get_testcase_commands, validate_new_name, validate_rename_name
 
 def signin(request):
     if request.method == 'GET':
@@ -112,52 +112,19 @@ def edit(request):
         return edit_post(request)
 
 
-@dataclass(frozen=True)
-class CheckNameResult:
-    is_valid: bool
-    desc: str
-
-
-def check_valid_new_name(name: str, ignore_name: str) -> CheckNameResult:
-    if len(name) == 0:
-        return CheckNameResult(False, '名前が空です')
-    # 同じ名前のテストケースが存在する場合は無効
-    if ignore_name is None:
-        testcases = TestCase.objects
-    else:
-        testcases = TestCase.objects.exclude(title_path=ignore_name)
-
-    if testcases.filter(title_path__startswith=name).exists():
-        return CheckNameResult(False, f'同じ名前のテストケースが存在します\n{name}')
-    # 一番先頭が/始まりで末尾は/じゃないこと。/と/の間に文字があること
-    if re.match(r'^(/[\w-]+)*$', name) is None:
-        return CheckNameResult(False, f'名前のフォーマットが不正です\n{name}')
-
-    # 作ろうとしている名前のパスの一部がテストケースデータそのものを含む場合はエラー
-    # 作ろうとしている側はディレクトリとしてその名前が機能するようにしたいが、すでにデータの実体として存在しているためエラー
-    words = name.split('/')[1:]
-    path = ""
-    for word in words:
-        path = path + "/" + word
-        is_testcase_data = len(testcases.filter(title_path=path)) == 1
-        if is_testcase_data:
-            return CheckNameResult(False, f'作ろうとしている名前のパスの一部がテストケースデータとして存在します\n{name}\n{path}')
-    return CheckNameResult(True, '')
-
-
 @login_required(login_url='/signin')
 def create(request):
     if request.method == 'POST':
         new_name = request.POST['testcaseName']
-        check_result = check_valid_new_name(new_name, None)
-        if check_result.is_valid:
+        validate_result = validate_new_name(new_name)
+        if validate_result.is_valid:
             new_testcase = TestCase(title_path=new_name)
             new_testcase.save()
             redirect_uri = reverse('hosting:edit') + f'?path={new_name}'
             return HttpResponseRedirect(redirect_uri)
         else:
             params = {
-                'error_msg': check_result.desc,
+                'error_msg': validate_result.desc,
             }
             return render(request, 'hosting/errorpage.html', params)
     else:
@@ -180,15 +147,15 @@ def rename(request):
     if request.method == 'POST':
         new_name = request.POST['testcaseName']
         old_name = request.POST['oldName']
-        check_result = check_valid_new_name(new_name, old_name)
-        if check_result.is_valid:
+        validate_result = validate_rename_name(new_name, old_name)
+        if validate_result.is_valid:
             testcase_data = get_object_or_404(TestCase, title_path=old_name)
             testcase_data.title_path = new_name
             testcase_data.save()
             return HttpResponseRedirect(reverse('hosting:index'))
         else:
             params = {
-                'error_msg': check_result.desc,
+                'error_msg': validate_result.desc,
             }
             return render(request, 'hosting/errorpage.html', params)
 

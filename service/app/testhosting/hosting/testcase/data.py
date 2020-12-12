@@ -1,6 +1,8 @@
 import re
 from typing import List, Dict
+from dataclasses import dataclass
 from ..models import TestCase
+
 
 def _convert_test_commands(testcase_data: str) -> List[str]:
     """テストケース文字列をテストコマンドに変換する
@@ -39,6 +41,7 @@ def _convert_test_commands(testcase_data: str) -> List[str]:
 
     return commands
 
+
 def _get_raw_test_commands(name: str) -> List[str]:
     """テストケースのinclude解決を行っていない状態の生のコマンドを取得する
 
@@ -59,7 +62,8 @@ def _get_raw_test_commands(name: str) -> List[str]:
     if len(query_result) > 1:
         raise Exception(f'テストケース {name} が複数存在します')
 
-    return _convert_test_commands(query_result[0].testcase_data)    
+    return _convert_test_commands(query_result[0].testcase_data)
+
 
 def _resolve_commands(commands: List[str]) -> List[str]:
     """テストケースコマンドのinclude解決を行い、実際に実行されるコマンドを取得する  
@@ -94,7 +98,7 @@ def _resolve_commands(commands: List[str]) -> List[str]:
                     raise Exception(f'include先のテストケースでエラーが発生しました Command:{command}\ninclude先エラー:{exp}')
         else:
             resolved_commands.append(command)
-    
+
     return resolved_commands
 
 
@@ -113,3 +117,72 @@ def get_testcase_commands(name: str) -> List[str]:
     commands = _get_raw_test_commands(name)
     commands = _resolve_commands(commands)
     return commands
+
+
+@dataclass(frozen=True)
+class ValidateNameResult:
+    is_valid: bool
+    desc: str
+
+
+def _validate_name(name: str, ignore_name: str) -> ValidateNameResult:
+    """有効な名前かの検証処理
+
+    除外したい名前を指定するとリネームする名前が有効かを検証する関数として使用することができる
+
+    Args:
+        name (str): 検証したい名前
+        ignore_name (str): 除外したい名前
+
+    Returns:
+        ValidateNameResult: 検証結果
+    """
+    if len(name) == 0:
+        return ValidateNameResult(False, '名前が空です')
+    # 同じ名前のテストケースが存在する場合は無効
+    if ignore_name is None:
+        testcases = TestCase.objects
+    else:
+        testcases = TestCase.objects.exclude(title_path=ignore_name)
+
+    if testcases.filter(title_path__startswith=name).exists():
+        return ValidateNameResult(False, f'同じ名前のテストケースが存在します\n{name}')
+    # 一番先頭が/始まりで末尾は/じゃないこと。/と/の間に文字があること
+    if re.match(r'^(/[\w-]+)*$', name) is None:
+        return ValidateNameResult(False, f'名前のフォーマットが不正です\n{name}')
+
+    # 作ろうとしている名前のパスの一部がテストケースデータそのものを含む場合はエラー
+    # 作ろうとしている側はディレクトリとしてその名前が機能するようにしたいが、すでにデータの実体として存在しているためエラー
+    words = name.split('/')[1:]
+    path = ""
+    for word in words:
+        path = path + "/" + word
+        is_testcase_data = len(testcases.filter(title_path=path)) == 1
+        if is_testcase_data:
+            return ValidateNameResult(False, f'作ろうとしている名前のパスの一部がテストケースデータとして存在します\n{name}\n{path}')
+    return ValidateNameResult(True, '')
+
+
+def validate_new_name(name: str) -> ValidateNameResult:
+    """新規作成するテストケース名として有効な名前か検証する
+
+    Args:
+        name (str): 新規作成するテストケース名
+
+    Returns:
+        ValidateNameResult: 検証結果
+    """
+    return _validate_name(name, None)
+
+
+def validate_rename_name(name: str, oldname: str) -> ValidateNameResult:
+    """名前変更しようとしているテストケースの変更予定の名前が有効な名前か検証する
+
+    Args:
+        name (str): 変更予定の名前
+        oldname (str): 現在の名前
+
+    Returns:
+        ValidateNameResult: 検証結果
+    """
+    return _validate_name(name, oldname)
