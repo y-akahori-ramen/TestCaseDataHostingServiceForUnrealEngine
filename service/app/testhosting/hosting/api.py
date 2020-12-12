@@ -9,7 +9,7 @@ from .models import TestCase
 
 from .testcase.data import get_testcase_commands, get_testcase_summary, validate_new_name
 
-_KEY_Name = 'Name'
+_KEY_NAME = 'Name'
 _KEY_SUMMARY = 'Summary'
 _KEY_COMMANDS = 'Commands'
 _KEY_MESSAGE = 'Message'
@@ -33,6 +33,7 @@ def get_json_data(request):
         commands = get_testcase_commands(path)
         summary = get_testcase_summary(path)
         response = {
+            _KEY_NAME: path,
             _KEY_COMMANDS: commands,
             _KEY_SUMMARY: summary,
             _KEY_MESSAGE: _MESSAGE_SUCCESS
@@ -40,6 +41,7 @@ def get_json_data(request):
         return Response(response)
     except Exception as exp:
         response = {
+            _KEY_NAME: path,
             _KEY_COMMANDS: [],
             _KEY_SUMMARY: '',
             _KEY_MESSAGE: f'{exp}'
@@ -92,8 +94,8 @@ def _convert_testcase_data(dist) -> Optional[_TestCaseData]:
     Returns:
         [_TestCaseData]: テストケースデータ。ディクショナリ内に必要なキーが無い場合はNoneを返します
     """
-    if _KEY_Name in dist:
-        name = dist[_KEY_Name]
+    if _KEY_NAME in dist:
+        name = dist[_KEY_NAME]
     else:
         return None
 
