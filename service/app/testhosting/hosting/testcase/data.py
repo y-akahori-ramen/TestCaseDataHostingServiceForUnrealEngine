@@ -42,6 +42,29 @@ def _convert_test_commands(testcase_data: str) -> List[str]:
     return commands
 
 
+def _get_testcase_object(name: str) -> TestCase:
+    """テストケースモデルオブジェクト取得
+
+    Args:
+        name (str): テストケース名
+
+    Raises:
+        Exception: 取得に失敗した場合例外を送出します
+
+    Returns:
+        TestCase: テストケースモデルのオブジェクト
+    """
+    query_result = TestCase.objects.filter(title_path=name)
+
+    if not query_result.exists():
+        raise Exception(f'テストケース {name} が存在していません')
+
+    if len(query_result) > 1:
+        raise Exception(f'テストケース {name} が複数存在します')
+
+    return query_result[0]
+
+
 def _get_raw_test_commands(name: str) -> List[str]:
     """テストケースのinclude解決を行っていない状態の生のコマンドを取得する
 
@@ -54,15 +77,8 @@ def _get_raw_test_commands(name: str) -> List[str]:
     Returns:
         List[str]: テストコマンド配列
     """
-    query_result = TestCase.objects.filter(title_path=name)
-
-    if not query_result.exists():
-        raise Exception(f'テストケース {name} が存在していません')
-
-    if len(query_result) > 1:
-        raise Exception(f'テストケース {name} が複数存在します')
-
-    return _convert_test_commands(query_result[0].testcase_data)
+    testcase = _get_testcase_object(name)
+    return _convert_test_commands(testcase.testcase_data)
 
 
 def _resolve_commands(commands: List[str]) -> List[str]:
@@ -117,6 +133,22 @@ def get_testcase_commands(name: str) -> List[str]:
     commands = _get_raw_test_commands(name)
     commands = _resolve_commands(commands)
     return commands
+
+
+def get_testcase_summary(name: str) -> str:
+    """テストケースサマリー取得
+
+    Args:
+        name (str): テストケース名
+
+    Raises:
+        Exception: 解決に失敗した場合例外を送出します
+
+    Returns:
+        str: サマリー情報
+    """
+    testcase = _get_testcase_object(name)
+    return testcase.summary
 
 
 @dataclass(frozen=True)
