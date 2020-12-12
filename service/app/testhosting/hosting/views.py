@@ -14,7 +14,7 @@ from rest_framework.response import Response
 from rest_framework import permissions, status
 from .models import TestCase
 from .testcase import view_util
-from .testcase.data import GetTestCaseData
+from .testcase.data import get_testcase_commands
 
 def signin(request):
     if request.method == 'GET':
@@ -53,8 +53,8 @@ def index(request):
     else:
         cur_dir = ''
 
-    list_items = view_util.GetTestCaseListItems(cur_dir)
-    breadcrumb_items = view_util.GetBreadcrumbItems(cur_dir)
+    list_items = view_util.get_testcase_list_items(cur_dir)
+    breadcrumb_items = view_util.get_breadcrumb_items(cur_dir)
     params = {
         'list_items': list_items,
         'breadcrumb_items': breadcrumb_items,
@@ -75,7 +75,7 @@ def edit_get(request):
 
     testcase_data = get_object_or_404(TestCase, title_path=path)
 
-    breadcrumb_items = view_util.GetBreadcrumbItems(path)
+    breadcrumb_items = view_util.get_breadcrumb_items(path)
 
     # パンくずリストの末尾が自分のデータのパスなのでそれより１つ前が戻るべきパスとなる
     backurl_path = breadcrumb_items[-2].url_param
@@ -97,7 +97,7 @@ def edit_post(request):
     testcase_data.save()
 
     # 一つ前のリストに戻す
-    breadcrumb_items = view_util.GetBreadcrumbItems(request.GET['path'])
+    breadcrumb_items = view_util.get_breadcrumb_items(request.GET['path'])
     backurl_path = breadcrumb_items[-2].url_param
 
     redirect_uri = reverse('hosting:index') + f'?path={backurl_path}'
@@ -204,7 +204,7 @@ def get_json_data(request):
         path = ''
 
     try:
-        commands = GetTestCaseData(path)
+        commands = get_testcase_commands(path)
         response = {
             'commands': commands,
             'message': '成功しました'

@@ -2,7 +2,7 @@ import re
 from typing import List, Dict
 from ..models import TestCase
 
-def _ConvertTestCommands(testcase_data: str) -> List[str]:
+def _convert_test_commands(testcase_data: str) -> List[str]:
     """テストケース文字列をテストコマンドに変換する
 
     文字列中のコメントや不用な空白を取り除きコマンド文字列のリストに変換する。
@@ -39,7 +39,7 @@ def _ConvertTestCommands(testcase_data: str) -> List[str]:
 
     return commands
 
-def _GetRawTestCommands(name: str) -> List[str]:
+def _get_raw_test_commands(name: str) -> List[str]:
     """テストケースのinclude解決を行っていない状態の生のコマンドを取得する
 
     Args:
@@ -59,9 +59,9 @@ def _GetRawTestCommands(name: str) -> List[str]:
     if len(query_result) > 1:
         raise Exception(f'テストケース {name} が複数存在します')
 
-    return _ConvertTestCommands(query_result[0].testcase_data)    
+    return _convert_test_commands(query_result[0].testcase_data)    
 
-def _ResolveCommands(commands: List[str]) -> List[str]:
+def _resolve_commands(commands: List[str]) -> List[str]:
     """テストケースコマンドのinclude解決を行い、実際に実行されるコマンドを取得する  
 
     Args:
@@ -87,8 +87,8 @@ def _ResolveCommands(commands: List[str]) -> List[str]:
                 include_path = include_match.group(1)
 
                 try:
-                    include_commands = _GetRawTestCommands(include_path)
-                    include_commands = _ResolveCommands(include_commands)
+                    include_commands = _get_raw_test_commands(include_path)
+                    include_commands = _resolve_commands(include_commands)
                     resolved_commands += include_commands
                 except Exception as exp:
                     raise Exception(f'include先のテストケースでエラーが発生しました Command:{command}\ninclude先エラー:{exp}')
@@ -98,8 +98,8 @@ def _ResolveCommands(commands: List[str]) -> List[str]:
     return resolved_commands
 
 
-def GetTestCaseData(name: str) -> List[str]:
-    """テストケースデータ取得
+def get_testcase_commands(name: str) -> List[str]:
+    """テストケースコマンド取得
 
     Args:
         name (str): テストケース名
@@ -110,6 +110,6 @@ def GetTestCaseData(name: str) -> List[str]:
     Returns:
         List[str]: テストケースコマンド
     """
-    commands = _GetRawTestCommands(name)
-    commands = _ResolveCommands(commands)
+    commands = _get_raw_test_commands(name)
+    commands = _resolve_commands(commands)
     return commands

@@ -23,7 +23,7 @@ class TestCaseListItem:
     summary: str
 
 
-def GetTestCaseListItems(cur_dir_path: str) -> List[TestCaseListItem]:
+def get_testcase_list_items(cur_dir_path: str) -> List[TestCaseListItem]:
     """指定したパスに含まれるテストケース一覧取得
 
     Args:
@@ -102,7 +102,7 @@ class BreadcrumbItem:
     is_active: bool
 
 
-def GetBreadcrumbItems(cur_dir_path: str) -> List[BreadcrumbItem]:
+def get_breadcrumb_items(cur_dir_path: str) -> List[BreadcrumbItem]:
     """指定されたパスのパンくずリスト情報を取得する
 
     Args:
