@@ -10,7 +10,7 @@ public class TestHostingSampleModule : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay" });
 
-		// TestHostingServiceプラグインのC++を使用できるようにする
+		// TestHostingService繝励Λ繧ｰ繧､繝ｳ縺ｮC++繧剃ｽｿ逕ｨ縺ｧ縺阪ｋ繧医≧縺ｫ縺吶ｋ
 		PublicDependencyModuleNames.Add("TestHostingService");
 	}
 }

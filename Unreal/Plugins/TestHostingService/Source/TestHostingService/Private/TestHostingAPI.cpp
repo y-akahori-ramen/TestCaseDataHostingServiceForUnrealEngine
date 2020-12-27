@@ -35,7 +35,7 @@ namespace TestHosting
 
 
 	//---------------------------------------------------------------------
-	// API‚ğg—p‚·‚é‚Ì‚É•K—v‚ÈŠeíî•ñ
+	// APIã‚’ä½¿ç”¨ã™ã‚‹ã®ã«å¿…è¦ãªå„ç¨®æƒ…å ±
 	//---------------------------------------------------------------------
 	FContext::FContext(const FString& User, const FString& Password, const FString& ServiceURI)
 		: UserPasswordForBasicAuth(FBase64::Encode(FString::Format(TEXT("{0}:{1}"), {*User, *Password}))),
@@ -67,7 +67,7 @@ namespace TestHosting
 	}
 
 	//---------------------------------------------------------------------
-	// ƒeƒXƒgƒP[ƒXƒf[ƒ^
+	// ãƒ†ã‚¹ãƒˆã‚±ãƒ¼ã‚¹ãƒ‡ãƒ¼ã‚¿
 	//---------------------------------------------------------------------
 	FTestCaseData::FTestCaseData(const FString& Name, const TArray<FString>& Commands, const FString& Summary)
 		: Name(Name),
@@ -77,7 +77,7 @@ namespace TestHosting
 	}
 	
 	//---------------------------------------------------------------------
-	// API‚ğƒeƒXƒgƒP[ƒXƒf[ƒ^æ“¾ƒŠƒNƒGƒXƒg
+	// APIã‚’ãƒ†ã‚¹ãƒˆã‚±ãƒ¼ã‚¹ãƒ‡ãƒ¼ã‚¿å–å¾—ãƒªã‚¯ã‚¨ã‚¹ãƒˆ
 	//---------------------------------------------------------------------
 	FRequestResult FGetTestCaseDataRequest::Request(const FString& TestCaseName, const FContext& Context)
 	{
@@ -93,10 +93,10 @@ namespace TestHosting
 
 		Request->ProcessRequest();
 
-		// HTTPƒ‚ƒWƒ…[ƒ‹‚ğ‹­§“I‚Éì“®‚³‚¹‚é
+		// HTTPãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚’å¼·åˆ¶çš„ã«ä½œå‹•ã•ã›ã‚‹
 		FHttpModule::Get().GetHttpManager().Flush(false);
 
-		// ã‹Lˆ—‚É‚æ‚èOnGetRequestComplete‚ªŒÄ‚Ño‚³‚ê‚Ä‚¢‚é‚½‚ßŒ‹‰Ê‚ÉƒAƒNƒZƒX‚·‚é‚±‚Æ‚ª‚Å‚«‚éB
+		// ä¸Šè¨˜å‡¦ç†ã«ã‚ˆã‚ŠOnGetRequestCompleteãŒå‘¼ã³å‡ºã•ã‚Œã¦ã„ã‚‹ãŸã‚çµæœã«ã‚¢ã‚¯ã‚»ã‚¹ã™ã‚‹ã“ã¨ãŒã§ãã‚‹ã€‚
 		check(Result.IsSet());
 
 		return Result.GetValue();
@@ -179,13 +179,13 @@ namespace TestHosting
 	}
 
 	//---------------------------------------------------------------------
-	// API‚ğƒeƒXƒgƒP[ƒXƒf[ƒ^æ“¾ƒŠƒNƒGƒXƒg
+	// APIã‚’ãƒ†ã‚¹ãƒˆã‚±ãƒ¼ã‚¹ãƒ‡ãƒ¼ã‚¿å–å¾—ãƒªã‚¯ã‚¨ã‚¹ãƒˆ
 	//---------------------------------------------------------------------
 	FRequestResult FAddTestCaseDataRequest::Request(const FTestCaseData& TestCaseData, const FContext& Context)
 	{
 		Result.Reset();
 
-		// Jsonƒf[ƒ^‚Ìì¬
+		// Jsonãƒ‡ãƒ¼ã‚¿ã®ä½œæˆ
 		TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject);
 		TArray<TSharedPtr<FJsonValue>> Commands;
 		for (const FString& Command : TestCaseData.GetCommands())
@@ -196,12 +196,12 @@ namespace TestHosting
 		JsonObject->SetStringField(Internal::FJsonKeys::KeyName, TestCaseData.GetName());
 		JsonObject->SetStringField(Internal::FJsonKeys::KeySummary, TestCaseData.GetSummary());
 
-		// Json‘‚«o‚µ
+		// Jsonæ›¸ãå‡ºã—
 		FString JsonString;
 		TSharedRef<TJsonWriter<TCHAR>> JsonWriter = TJsonWriterFactory<>::Create(&JsonString);
 		FJsonSerializer::Serialize(JsonObject.ToSharedRef(), JsonWriter);
 
-		// ‘—‚éHTTPƒŠƒNƒGƒXƒgİ’è
+		// é€ã‚‹HTTPãƒªã‚¯ã‚¨ã‚¹ãƒˆè¨­å®š
 		TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 
 		Request->SetURL(Context.GetURIAddTestCaseData());
@@ -214,10 +214,10 @@ namespace TestHosting
 
 		Request->ProcessRequest();
 
-		// HTTPƒ‚ƒWƒ…[ƒ‹‚ğ‹­§“I‚Éì“®‚³‚¹‚é
+		// HTTPãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚’å¼·åˆ¶çš„ã«ä½œå‹•ã•ã›ã‚‹
 		FHttpModule::Get().GetHttpManager().Flush(false);
 
-		// ã‹Lˆ—‚É‚æ‚èOnGetRequestComplete‚ªŒÄ‚Ño‚³‚ê‚Ä‚¢‚é‚½‚ßŒ‹‰Ê‚ÉƒAƒNƒZƒX‚·‚é‚±‚Æ‚ª‚Å‚«‚éB
+		// ä¸Šè¨˜å‡¦ç†ã«ã‚ˆã‚ŠOnGetRequestCompleteãŒå‘¼ã³å‡ºã•ã‚Œã¦ã„ã‚‹ãŸã‚çµæœã«ã‚¢ã‚¯ã‚»ã‚¹ã™ã‚‹ã“ã¨ãŒã§ãã‚‹ã€‚
 		check(Result.IsSet());
 
 		return Result.GetValue();
@@ -279,7 +279,7 @@ namespace TestHosting
 
 
 	//---------------------------------------------------------------------
-	// ƒeƒXƒgƒP[ƒXƒf[ƒ^–¼ˆê——æ“¾ƒŠƒNƒGƒXƒg
+	// ãƒ†ã‚¹ãƒˆã‚±ãƒ¼ã‚¹ãƒ‡ãƒ¼ã‚¿åä¸€è¦§å–å¾—ãƒªã‚¯ã‚¨ã‚¹ãƒˆ
 	//---------------------------------------------------------------------
 	const TArray<FString> FGetTestCaseListRequest::InvalidTestCaseNames;
 
@@ -297,10 +297,10 @@ namespace TestHosting
 
 		Request->ProcessRequest();
 
-		// HTTPƒ‚ƒWƒ…[ƒ‹‚ğ‹­§“I‚Éì“®‚³‚¹‚é
+		// HTTPãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚’å¼·åˆ¶çš„ã«ä½œå‹•ã•ã›ã‚‹
 		FHttpModule::Get().GetHttpManager().Flush(false);
 
-		// ã‹Lˆ—‚É‚æ‚èOnGetRequestComplete‚ªŒÄ‚Ño‚³‚ê‚Ä‚¢‚é‚½‚ßŒ‹‰Ê‚ÉƒAƒNƒZƒX‚·‚é‚±‚Æ‚ª‚Å‚«‚éB
+		// ä¸Šè¨˜å‡¦ç†ã«ã‚ˆã‚ŠOnGetRequestCompleteãŒå‘¼ã³å‡ºã•ã‚Œã¦ã„ã‚‹ãŸã‚çµæœã«ã‚¢ã‚¯ã‚»ã‚¹ã™ã‚‹ã“ã¨ãŒã§ãã‚‹ã€‚
 		check(Result.IsSet());
 
 		return Result.GetValue();

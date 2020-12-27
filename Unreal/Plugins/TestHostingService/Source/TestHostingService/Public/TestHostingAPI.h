@@ -9,38 +9,38 @@ namespace TestHosting
 {
 	
 	/**
-	 * @brief API‚ğg—p‚·‚é‚Ì‚É•K—v‚ÈŠeíî•ñ
+	 * @brief APIã‚’ä½¿ç”¨ã™ã‚‹ã®ã«å¿…è¦ãªå„ç¨®æƒ…å ±
 	 */
 	class TESTHOSTINGSERVICE_API FContext final
 	{
 	public:
 		/**
-		 * @brief ƒRƒ“ƒXƒgƒ‰ƒNƒ^
-		 * @param User ƒ†[ƒU[–¼
-		 * @param Password ƒpƒXƒ[ƒh
-		 * @param ServiceURI ƒeƒXƒgƒzƒXƒeƒBƒ“ƒOƒT[ƒrƒX‚ÌURI
+		 * @brief ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
+		 * @param User ãƒ¦ãƒ¼ã‚¶ãƒ¼å
+		 * @param Password ãƒ‘ã‚¹ãƒ¯ãƒ¼ãƒ‰
+		 * @param ServiceURI ãƒ†ã‚¹ãƒˆãƒ›ã‚¹ãƒ†ã‚£ãƒ³ã‚°ã‚µãƒ¼ãƒ“ã‚¹ã®URI
 		 */
 		FContext(const FString& User, const FString& Password, const FString& ServiceURI);
 
 		/**
-		 * @brief ƒeƒXƒgƒP[ƒXæ“¾—p‚ÌURI‚ğæ“¾‚·‚é
-		 * @param TestCaseDataName æ“¾‚µ‚½‚¢ƒeƒXƒgƒP[ƒX–¼
+		 * @brief ãƒ†ã‚¹ãƒˆã‚±ãƒ¼ã‚¹å–å¾—ç”¨ã®URIã‚’å–å¾—ã™ã‚‹
+		 * @param TestCaseDataName å–å¾—ã—ãŸã„ãƒ†ã‚¹ãƒˆã‚±ãƒ¼ã‚¹å
 		 */
 		FString GetURIGetTestCaseData(FString TestCaseDataName) const;
 
 		/**
-		 * @brief ƒeƒXƒgƒP[ƒX’Ç‰Á—p‚ÌURI‚ğæ“¾‚·‚é
+		 * @brief ãƒ†ã‚¹ãƒˆã‚±ãƒ¼ã‚¹è¿½åŠ ç”¨ã®URIã‚’å–å¾—ã™ã‚‹
 		 */
 		FString GetURIAddTestCaseData() const;
 
 		/**
-		 * @brief ƒeƒXƒgƒP[ƒX–¼ˆê——æ“¾—p‚ÌURI‚ğæ“¾‚·‚é
+		 * @brief ãƒ†ã‚¹ãƒˆã‚±ãƒ¼ã‚¹åä¸€è¦§å–å¾—ç”¨ã®URIã‚’å–å¾—ã™ã‚‹
 		 */
 		FString GetURIGetTestCaseNameList() const;
 		
 		/**
-		 * @brief HTTPƒŠƒNƒGƒXƒg‚ÉBasic”FØƒwƒbƒ_[‚ğ’Ç‰Á‚·‚é
-		 * @param Request HTTPƒŠƒNƒGƒXƒg
+		 * @brief HTTPãƒªã‚¯ã‚¨ã‚¹ãƒˆã«Basicèªè¨¼ãƒ˜ãƒƒãƒ€ãƒ¼ã‚’è¿½åŠ ã™ã‚‹
+		 * @param Request HTTPãƒªã‚¯ã‚¨ã‚¹ãƒˆ
 		 */
 		void AppendBasicAuthHeader(TSharedRef<IHttpRequest> Request) const;
 
@@ -52,7 +52,7 @@ namespace TestHosting
 	};
 
 	/**
-	 * @brief ƒŠƒNƒGƒXƒgŒ‹‰Ê
+	 * @brief ãƒªã‚¯ã‚¨ã‚¹ãƒˆçµæœ
 	 */
 	class TESTHOSTINGSERVICE_API FRequestResult final
 	{
@@ -63,13 +63,13 @@ namespace TestHosting
 		}
 
 		/**
-		 * @brief ¬Œ÷‚µ‚½‚©
+		 * @brief æˆåŠŸã—ãŸã‹
 		 */
 		bool IsSuccess() const { return bIsSuccess; }
 
 		/**
-		 * @brief ƒŠƒNƒGƒXƒgÚ×ƒƒbƒZ[ƒW
-		 *		@ ƒŠƒNƒGƒXƒg‚É¸”s‚µ‚½ê‡‚ÌƒGƒ‰[‚ÌÚ×“™‚ª“ü‚è‚Ü‚·B
+		 * @brief ãƒªã‚¯ã‚¨ã‚¹ãƒˆè©³ç´°ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸
+		 *		ã€€ ãƒªã‚¯ã‚¨ã‚¹ãƒˆã«å¤±æ•—ã—ãŸå ´åˆã®ã‚¨ãƒ©ãƒ¼ã®è©³ç´°ç­‰ãŒå…¥ã‚Šã¾ã™ã€‚
 		 */
 		const FString& GetMessage() const { return Message; }
 	private:
@@ -78,7 +78,7 @@ namespace TestHosting
 	};
 
 	/**
-	 * @brief ƒeƒXƒgƒP[ƒXƒf[ƒ^
+	 * @brief ãƒ†ã‚¹ãƒˆã‚±ãƒ¼ã‚¹ãƒ‡ãƒ¼ã‚¿
 	 */
 	class TESTHOSTINGSERVICE_API FTestCaseData final
 	{
@@ -86,10 +86,10 @@ namespace TestHosting
 		FTestCaseData() = default;
 
 		/**
-		 * @brief ƒRƒ“ƒXƒgƒ‰ƒNƒ^
-		 * @param Name ƒeƒXƒgƒP[ƒX–¼
-		 * @param Commands ƒeƒXƒgƒRƒ}ƒ“ƒh”z—ñ
-		 * @param Summary ƒeƒXƒgƒP[ƒXƒTƒ}ƒŠî•ñ
+		 * @brief ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
+		 * @param Name ãƒ†ã‚¹ãƒˆã‚±ãƒ¼ã‚¹å
+		 * @param Commands ãƒ†ã‚¹ãƒˆã‚³ãƒãƒ³ãƒ‰é…åˆ—
+		 * @param Summary ãƒ†ã‚¹ãƒˆã‚±ãƒ¼ã‚¹ã‚µãƒãƒªæƒ…å ±
 		 */
 		FTestCaseData(const FString& Name, const TArray<FString>& Commands, const FString& Summary);
 
@@ -104,35 +104,35 @@ namespace TestHosting
 	};
 
 	/**
-	 * @brief ƒeƒXƒgƒP[ƒXƒf[ƒ^æ“¾ƒŠƒNƒGƒXƒg
+	 * @brief ãƒ†ã‚¹ãƒˆã‚±ãƒ¼ã‚¹ãƒ‡ãƒ¼ã‚¿å–å¾—ãƒªã‚¯ã‚¨ã‚¹ãƒˆ
 	 */
 	class TESTHOSTINGSERVICE_API FGetTestCaseDataRequest final
 	{
 	public:
 
 		/**
-		 * @brief ƒeƒXƒgƒP[ƒXƒf[ƒ^æ“¾ƒŠƒNƒGƒXƒg‚ğs‚¤@¦“¯ŠúÀs‚³‚ê‚Ü‚·B
-		 * @param TestCaseName æ“¾‚µ‚½‚¢ƒeƒXƒgƒP[ƒXƒf[ƒ^‚Ì–¼‘O
-		 * @param Context ”FØî•ñ‚È‚Ç‚ÌƒRƒ“ƒeƒLƒXƒg
-		 * @return ƒŠƒNƒGƒXƒgŒ‹‰Ê
+		 * @brief ãƒ†ã‚¹ãƒˆã‚±ãƒ¼ã‚¹ãƒ‡ãƒ¼ã‚¿å–å¾—ãƒªã‚¯ã‚¨ã‚¹ãƒˆã‚’è¡Œã†ã€€â€»åŒæœŸå®Ÿè¡Œã•ã‚Œã¾ã™ã€‚
+		 * @param TestCaseName å–å¾—ã—ãŸã„ãƒ†ã‚¹ãƒˆã‚±ãƒ¼ã‚¹ãƒ‡ãƒ¼ã‚¿ã®åå‰
+		 * @param Context èªè¨¼æƒ…å ±ãªã©ã®ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+		 * @return ãƒªã‚¯ã‚¨ã‚¹ãƒˆçµæœ
 		 */
 		FRequestResult Request(const FString& TestCaseName, const FContext& Context);
 
 		/**
-		 * @brief ƒŠƒNƒGƒXƒgÀsÏ‚İ‚Å—LŒø‚Èƒf[ƒ^‚ğ‚Á‚Ä‚¢‚é‚©
-		 *         ˆê“x‚àƒŠƒNƒGƒXƒg‚ğs‚Á‚Ä‚¢‚È‚¢ê‡—LŒøƒf[ƒ^‚ª‚È‚¢‚½‚ßfalse‚ğ•Ô‚µ‚Ü‚·B
+		 * @brief ãƒªã‚¯ã‚¨ã‚¹ãƒˆå®Ÿè¡Œæ¸ˆã¿ã§æœ‰åŠ¹ãªãƒ‡ãƒ¼ã‚¿ã‚’æŒã£ã¦ã„ã‚‹ã‹
+		 *         ä¸€åº¦ã‚‚ãƒªã‚¯ã‚¨ã‚¹ãƒˆã‚’è¡Œã£ã¦ã„ãªã„å ´åˆæœ‰åŠ¹ãƒ‡ãƒ¼ã‚¿ãŒãªã„ãŸã‚falseã‚’è¿”ã—ã¾ã™ã€‚
 		 */
 		bool IsValid() const;
 		
 		/**
-		 * @brief ƒŠƒNƒGƒXƒgŒ‹‰Ê‚Ìæ“¾
-		 *		   IsValid()‚ªfalse‚ğ•Ô‚·ó‘Ô‚ÅŒÄ‚Ño‚·‚Æensure‚ª”­¶‚µ‚Ü‚·B
+		 * @brief ãƒªã‚¯ã‚¨ã‚¹ãƒˆçµæœã®å–å¾—
+		 *		   IsValid()ãŒfalseã‚’è¿”ã™çŠ¶æ…‹ã§å‘¼ã³å‡ºã™ã¨ensureãŒç™ºç”Ÿã—ã¾ã™ã€‚
 		 */
 		const FRequestResult& GetResult() const;
 
 		/**
-		 * @brief ƒŠƒNƒGƒXƒg‚É‚æ‚Á‚Äæ“¾‚µ‚½ƒeƒXƒgƒP[ƒXƒf[ƒ^‚Ìæ“¾
-		 *         IsValid()‚ªfalse‚ğ•Ô‚·ó‘Ô‚ÅŒÄ‚Ño‚·‚Æensure‚ª”­¶‚µ‚Ü‚·B
+		 * @brief ãƒªã‚¯ã‚¨ã‚¹ãƒˆã«ã‚ˆã£ã¦å–å¾—ã—ãŸãƒ†ã‚¹ãƒˆã‚±ãƒ¼ã‚¹ãƒ‡ãƒ¼ã‚¿ã®å–å¾—
+		 *         IsValid()ãŒfalseã‚’è¿”ã™çŠ¶æ…‹ã§å‘¼ã³å‡ºã™ã¨ensureãŒç™ºç”Ÿã—ã¾ã™ã€‚
 		 */
 		const FTestCaseData& GetTestCaseData() const;
 		
@@ -145,30 +145,30 @@ namespace TestHosting
 
 	
 	/**
-	 * @brief ƒeƒXƒgƒP[ƒXƒf[ƒ^’Ç‰ÁEXVƒŠƒNƒGƒXƒg
-	 *		@Šù‘¶‚ÌƒeƒXƒgƒP[ƒXƒf[ƒ^‚É‘Î‚µ‚Ä‘—‚é‚ÆXVˆµ‚¢‚Æ‚È‚è‚Ü‚·
+	 * @brief ãƒ†ã‚¹ãƒˆã‚±ãƒ¼ã‚¹ãƒ‡ãƒ¼ã‚¿è¿½åŠ ãƒ»æ›´æ–°ãƒªã‚¯ã‚¨ã‚¹ãƒˆ
+	 *		ã€€æ—¢å­˜ã®ãƒ†ã‚¹ãƒˆã‚±ãƒ¼ã‚¹ãƒ‡ãƒ¼ã‚¿ã«å¯¾ã—ã¦é€ã‚‹ã¨æ›´æ–°æ‰±ã„ã¨ãªã‚Šã¾ã™
 	 */
 	class TESTHOSTINGSERVICE_API FAddTestCaseDataRequest final
 	{
 	public:
 
 		/**
-		 * @brief ƒeƒXƒgƒP[ƒXƒf[ƒ^’Ç‰ÁEXVƒŠƒNƒGƒXƒg‚ğs‚¤
-		 * @param TestCaseData ‘ÎÛƒeƒXƒgƒP[ƒXƒf[ƒ^
-		 * @param Context ”FØî•ñ‚È‚Ç‚ÌƒRƒ“ƒeƒLƒXƒg
-		 * @return ƒŠƒNƒGƒXƒgŒ‹‰Ê
+		 * @brief ãƒ†ã‚¹ãƒˆã‚±ãƒ¼ã‚¹ãƒ‡ãƒ¼ã‚¿è¿½åŠ ãƒ»æ›´æ–°ãƒªã‚¯ã‚¨ã‚¹ãƒˆã‚’è¡Œã†
+		 * @param TestCaseData å¯¾è±¡ãƒ†ã‚¹ãƒˆã‚±ãƒ¼ã‚¹ãƒ‡ãƒ¼ã‚¿
+		 * @param Context èªè¨¼æƒ…å ±ãªã©ã®ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+		 * @return ãƒªã‚¯ã‚¨ã‚¹ãƒˆçµæœ
 		 */
 		FRequestResult Request(const FTestCaseData& TestCaseData, const FContext& Context);
 
 		/**
-		 * @brief ƒŠƒNƒGƒXƒgÀsÏ‚İ‚Å—LŒø‚Èƒf[ƒ^‚ğ‚Á‚Ä‚¢‚é‚©
-		 *         ˆê“x‚àƒŠƒNƒGƒXƒg‚ğs‚Á‚Ä‚¢‚È‚¢ê‡—LŒøƒf[ƒ^‚ª‚È‚¢‚½‚ßfalse‚ğ•Ô‚µ‚Ü‚·B
+		 * @brief ãƒªã‚¯ã‚¨ã‚¹ãƒˆå®Ÿè¡Œæ¸ˆã¿ã§æœ‰åŠ¹ãªãƒ‡ãƒ¼ã‚¿ã‚’æŒã£ã¦ã„ã‚‹ã‹
+		 *         ä¸€åº¦ã‚‚ãƒªã‚¯ã‚¨ã‚¹ãƒˆã‚’è¡Œã£ã¦ã„ãªã„å ´åˆæœ‰åŠ¹ãƒ‡ãƒ¼ã‚¿ãŒãªã„ãŸã‚falseã‚’è¿”ã—ã¾ã™ã€‚
 		 */
 		bool IsValid() const;
 
 		/**
-		 * @brief ƒŠƒNƒGƒXƒgŒ‹‰Ê‚Ìæ“¾
-		 *		   IsValid()‚ªfalse‚ğ•Ô‚·ó‘Ô‚ÅŒÄ‚Ño‚·‚Æensure‚ª”­¶‚µ‚Ü‚·B
+		 * @brief ãƒªã‚¯ã‚¨ã‚¹ãƒˆçµæœã®å–å¾—
+		 *		   IsValid()ãŒfalseã‚’è¿”ã™çŠ¶æ…‹ã§å‘¼ã³å‡ºã™ã¨ensureãŒç™ºç”Ÿã—ã¾ã™ã€‚
 		 */
 		const FRequestResult& GetResult() const;
 
@@ -179,34 +179,34 @@ namespace TestHosting
 
 
 	/**
-	 * @brief ƒeƒXƒgƒP[ƒXƒf[ƒ^–¼ˆê——æ“¾ƒŠƒNƒGƒXƒg
+	 * @brief ãƒ†ã‚¹ãƒˆã‚±ãƒ¼ã‚¹ãƒ‡ãƒ¼ã‚¿åä¸€è¦§å–å¾—ãƒªã‚¯ã‚¨ã‚¹ãƒˆ
 	 */
 	class TESTHOSTINGSERVICE_API FGetTestCaseListRequest final
 	{
 	public:
 
 		/**
-		 * @brief ƒeƒXƒgƒP[ƒXƒf[ƒ^’Ç‰ÁEXVƒŠƒNƒGƒXƒg‚ğs‚¤
-		 * @param Context ”FØî•ñ‚È‚Ç‚ÌƒRƒ“ƒeƒLƒXƒg
-		 * @return ƒŠƒNƒGƒXƒgŒ‹‰Ê
+		 * @brief ãƒ†ã‚¹ãƒˆã‚±ãƒ¼ã‚¹ãƒ‡ãƒ¼ã‚¿è¿½åŠ ãƒ»æ›´æ–°ãƒªã‚¯ã‚¨ã‚¹ãƒˆã‚’è¡Œã†
+		 * @param Context èªè¨¼æƒ…å ±ãªã©ã®ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+		 * @return ãƒªã‚¯ã‚¨ã‚¹ãƒˆçµæœ
 		 */
 		FRequestResult Request(const FContext& Context);
 
 		/**
-		 * @brief ƒŠƒNƒGƒXƒgÀsÏ‚İ‚Å—LŒø‚Èƒf[ƒ^‚ğ‚Á‚Ä‚¢‚é‚©
-		 *         ˆê“x‚àƒŠƒNƒGƒXƒg‚ğs‚Á‚Ä‚¢‚È‚¢ê‡—LŒøƒf[ƒ^‚ª‚È‚¢‚½‚ßfalse‚ğ•Ô‚µ‚Ü‚·B
+		 * @brief ãƒªã‚¯ã‚¨ã‚¹ãƒˆå®Ÿè¡Œæ¸ˆã¿ã§æœ‰åŠ¹ãªãƒ‡ãƒ¼ã‚¿ã‚’æŒã£ã¦ã„ã‚‹ã‹
+		 *         ä¸€åº¦ã‚‚ãƒªã‚¯ã‚¨ã‚¹ãƒˆã‚’è¡Œã£ã¦ã„ãªã„å ´åˆæœ‰åŠ¹ãƒ‡ãƒ¼ã‚¿ãŒãªã„ãŸã‚falseã‚’è¿”ã—ã¾ã™ã€‚
 		 */
 		bool IsValid() const;
 
 		/**
-		 * @brief ƒŠƒNƒGƒXƒgŒ‹‰Ê‚Ìæ“¾
-		 *		   IsValid()‚ªfalse‚ğ•Ô‚·ó‘Ô‚ÅŒÄ‚Ño‚·‚Æensure‚ª”­¶‚µ‚Ü‚·B
+		 * @brief ãƒªã‚¯ã‚¨ã‚¹ãƒˆçµæœã®å–å¾—
+		 *		   IsValid()ãŒfalseã‚’è¿”ã™çŠ¶æ…‹ã§å‘¼ã³å‡ºã™ã¨ensureãŒç™ºç”Ÿã—ã¾ã™ã€‚
 		 */
 		const FRequestResult& GetResult() const;
 		
 		/**
-		 * @brief ƒeƒXƒgƒP[ƒXƒf[ƒ^–¼ˆê——æ“¾
-		 *		   IsValid()‚ªfalse‚ğ•Ô‚·ó‘Ô‚ÅŒÄ‚Ño‚·‚Æensure‚ª”­¶‚µ‚Ü‚·B
+		 * @brief ãƒ†ã‚¹ãƒˆã‚±ãƒ¼ã‚¹ãƒ‡ãƒ¼ã‚¿åä¸€è¦§å–å¾—
+		 *		   IsValid()ãŒfalseã‚’è¿”ã™çŠ¶æ…‹ã§å‘¼ã³å‡ºã™ã¨ensureãŒç™ºç”Ÿã—ã¾ã™ã€‚
 		 */
 		const TArray<FString>& GetTestCaseNames() const;
 
