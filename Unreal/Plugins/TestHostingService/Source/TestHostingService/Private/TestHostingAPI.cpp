@@ -77,114 +77,99 @@ namespace TestHosting
 	}
 	
 	//---------------------------------------------------------------------
-	// APIをテストケースデータ取得リクエスト
+	// テストケースデータ取得リクエスト
 	//---------------------------------------------------------------------
-	FRequestResult FGetTestCaseDataRequest::Request(const FString& TestCaseName, const FContext& Context)
+	TFuture<FGetTestCaseDataResult> RequestGetTestCaseDataAsync(const FString& TestCaseName, const FContext& Context)
 	{
-		Result.Reset();
-		TestCaseData.Reset();
+		TSharedPtr<TPromise<FGetTestCaseDataResult>> Promise = MakeShareable(new TPromise<FGetTestCaseDataResult>());
+		TFuture<FGetTestCaseDataResult> Future = Promise->GetFuture();
+		
 
 		TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 
 		Request->SetURL(Context.GetURIGetTestCaseData(TestCaseName));
 		Context.AppendBasicAuthHeader(Request);
 
-		Request->OnProcessRequestComplete().BindRaw(this, &FGetTestCaseDataRequest::OnGetRequestComplete);
-
-		Request->ProcessRequest();
-
-		// HTTPモジュールを強制的に作動させる
-		FHttpModule::Get().GetHttpManager().Flush(false);
-
-		// 上記処理によりOnGetRequestCompleteが呼び出されているため結果にアクセスすることができる。
-		check(Result.IsSet());
-
-		return Result.GetValue();
-	}
-
-	bool FGetTestCaseDataRequest::IsValid() const
-	{
-		return Result.IsSet() && TestCaseData.IsSet();
-	}
-
-	const FRequestResult& FGetTestCaseDataRequest::GetResult() const
-	{
-		if (ensureAlways(IsValid()))
+		auto CompleteFunc = [=](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 		{
-			return Result.GetValue();
-		}
-		else
-		{
-			return Internal::InvalidResult;
-		}
-	}
-
-	const FTestCaseData& FGetTestCaseDataRequest::GetTestCaseData() const
-	{
-		if (ensureAlways(IsValid()))
-		{
-			return TestCaseData.GetValue();
-		}
-		else
-		{
-			return Internal::InvalidTestCaseData;
-		}
-	}
-
-	void FGetTestCaseDataRequest::OnGetRequestComplete(
-		FHttpRequestPtr Request,
-		FHttpResponsePtr Response,
-		bool bConnectedSuccessfully)
-	{
-		TestCaseData = Internal::InvalidTestCaseData;
-
-		if (!bConnectedSuccessfully)
-		{
-			Result = Internal::ConnectFailedResult;
-		}
-		else
-		{
-			if (Response->GetResponseCode() == EHttpResponseCodes::Ok)
+			if (!bConnectedSuccessfully)
 			{
-				FString Message;
-				TArray<FString> Commands;
-				FString Name;
-				FString Summary;
-
-				const TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(Response->GetContentAsString());
-				TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject());
-
-				const bool bParseSuccess = FJsonSerializer::Deserialize(JsonReader, JsonObject) &&
-					JsonObject->TryGetStringField(Internal::FJsonKeys::KeyName, Name) &&
-					JsonObject->TryGetStringField(Internal::FJsonKeys::KeySummary, Summary) &&
-					JsonObject->TryGetStringArrayField(Internal::FJsonKeys::KeyCommands, Commands) &&
-					JsonObject->TryGetStringField(Internal::FJsonKeys::KeyMessage, Message);
-				
-				if (bParseSuccess)
-				{
-					Result = FRequestResult(true, Message);
-					TestCaseData = FTestCaseData(Name, Commands, Summary);
-				}
-				else
-				{
-					const FString Msg = FString::Format(TEXT("ResponseParseFailed. Content: {0}"), {*Response->GetContentAsString()});
-					Result = FRequestResult(false, Msg);
-				}
+				Promise->SetValue(FGetTestCaseDataResult(Internal::ConnectFailedResult, Internal::InvalidTestCaseData));
 			}
 			else
 			{
-				Result = FRequestResult(false, Response->GetContentAsString());
+				if (Response->GetResponseCode() == EHttpResponseCodes::Ok)
+				{
+					FString Message;
+					TArray<FString> Commands;
+					FString Name;
+					FString Summary;
+
+					const TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(Response->GetContentAsString());
+					TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject());
+
+					const bool bParseSuccess = FJsonSerializer::Deserialize(JsonReader, JsonObject) &&
+						JsonObject->TryGetStringField(Internal::FJsonKeys::KeyName, Name) &&
+						JsonObject->TryGetStringField(Internal::FJsonKeys::KeySummary, Summary) &&
+						JsonObject->TryGetStringArrayField(Internal::FJsonKeys::KeyCommands, Commands) &&
+						JsonObject->TryGetStringField(Internal::FJsonKeys::KeyMessage, Message);
+
+					if (bParseSuccess)
+					{
+						Promise->SetValue(
+							FGetTestCaseDataResult(
+								FRequestResult(true, Message),
+								FTestCaseData(Name, Commands, Summary)
+							)
+						);
+					}
+					else
+					{
+						const FString Msg = FString::Format(TEXT("ResponseParseFailed. Content: {0}"), { *Response->GetContentAsString() });
+						Promise->SetValue(
+							FGetTestCaseDataResult(
+								FRequestResult(false, Msg),
+								Internal::InvalidTestCaseData
+							)
+						);
+					}
+				}
+				else
+				{
+					Promise->SetValue(
+						FGetTestCaseDataResult(
+							FRequestResult(false, Response->GetContentAsString()),
+							Internal::InvalidTestCaseData
+						)
+					);
+				}
 			}
-		}
+		};
+		
+		Request->OnProcessRequestComplete().BindLambda(CompleteFunc);
+
+		Request->ProcessRequest();
+
+
+		return Future;
+	}
+
+	FGetTestCaseDataResult RequestGetTestCaseData(const FString& TestCaseName, const FContext& Context)
+	{
+		const TFuture<FGetTestCaseDataResult> Future = RequestGetTestCaseDataAsync(TestCaseName, Context);
+		FHttpModule::Get().GetHttpManager().Flush(false);
+		check(Future.IsReady());
+		return Future.Get();
 	}
 
 	//---------------------------------------------------------------------
-	// APIをテストケースデータ取得リクエスト
+	// テストケースデータ追加・更新リクエスト
 	//---------------------------------------------------------------------
-	FRequestResult FAddTestCaseDataRequest::Request(const FTestCaseData& TestCaseData, const FContext& Context)
+	TFuture<FRequestResult> RequestAddTestCaseDataAsync(const FTestCaseData& TestCaseData, const FContext& Context)
 	{
-		Result.Reset();
-
+		TSharedPtr<TPromise<FRequestResult>> Promise = MakeShareable(new TPromise<FRequestResult>());
+		TFuture<FRequestResult> Future = Promise->GetFuture();
+		
 		// Jsonデータの作成
 		TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject);
 		TArray<TSharedPtr<FJsonValue>> Commands;
@@ -210,168 +195,118 @@ namespace TestHosting
 		Request->SetContentAsString(JsonString);
 		Request->SetHeader("Content-Type", TEXT("application/json"));
 
-		Request->OnProcessRequestComplete().BindRaw(this, &FAddTestCaseDataRequest::OnRequestComplete);
-
-		Request->ProcessRequest();
-
-		// HTTPモジュールを強制的に作動させる
-		FHttpModule::Get().GetHttpManager().Flush(false);
-
-		// 上記処理によりOnGetRequestCompleteが呼び出されているため結果にアクセスすることができる。
-		check(Result.IsSet());
-
-		return Result.GetValue();
-	}
-
-	bool FAddTestCaseDataRequest::IsValid() const
-	{
-		return Result.IsSet();
-	}
-
-	const FRequestResult& FAddTestCaseDataRequest::GetResult() const
-	{
-		if (ensureAlways(IsValid()))
+		auto CompleteFunc = [=](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 		{
-			return Result.GetValue();
-		}
-		else
-		{
-			return Internal::InvalidResult;
-		}
-	}
-
-	void FAddTestCaseDataRequest::OnRequestComplete(
-		FHttpRequestPtr Request,
-		FHttpResponsePtr Response,
-		bool bConnectedSuccessfully)
-	{
-		if (!bConnectedSuccessfully)
-		{
-			Result = Internal::ConnectFailedResult;
-		}
-		else
-		{
-			if (Response->GetResponseCode() == EHttpResponseCodes::Ok)
+			if (!bConnectedSuccessfully)
 			{
-				const TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(Response->GetContentAsString());
-				TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject());
-
-				FString Message;
-				const bool bParseSuccess = FJsonSerializer::Deserialize(JsonReader, JsonObject)
-					&& JsonObject->TryGetStringField(Internal::FJsonKeys::KeyMessage, Message);
-
-				if (bParseSuccess)
-				{
-					Result = FRequestResult(true, Message);
-				}
-				else
-				{
-					const FString Msg = FString::Format(TEXT("ResponseParseFailed. Content: {0}"), { *Response->GetContentAsString() });
-					Result = FRequestResult(false, Msg);
-				}
+				Promise->SetValue(Internal::ConnectFailedResult);
 			}
 			else
 			{
-				Result = FRequestResult(false, Response->GetContentAsString());
+				if (Response->GetResponseCode() == EHttpResponseCodes::Ok)
+				{
+					const TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(Response->GetContentAsString());
+					TSharedPtr<FJsonObject> ReadJsonObject = MakeShareable(new FJsonObject());
+
+					FString Message;
+					const bool bParseSuccess = FJsonSerializer::Deserialize(JsonReader, ReadJsonObject)
+						&& ReadJsonObject->TryGetStringField(Internal::FJsonKeys::KeyMessage, Message);
+
+					if (bParseSuccess)
+					{
+						Promise->SetValue(FRequestResult(true, Message));
+					}
+					else
+					{
+						const FString Msg = FString::Format(TEXT("ResponseParseFailed. Content: {0}"), { *Response->GetContentAsString() });
+						Promise->SetValue(FRequestResult(false, Msg));
+					}
+				}
+				else
+				{
+					Promise->SetValue(FRequestResult(false, Response->GetContentAsString()));
+				}
 			}
-		}
+		};
+
+		Request->OnProcessRequestComplete().BindLambda(CompleteFunc);
+
+		Request->ProcessRequest();
+
+		return Future;
 	}
 
+	FRequestResult RequestAddTestCaseData(const FTestCaseData& TestCaseData, const FContext& Context)
+	{
+		const TFuture<FRequestResult> Future = RequestAddTestCaseDataAsync(TestCaseData, Context);
+		FHttpModule::Get().GetHttpManager().Flush(false);
+		check(Future.IsReady());
+		return Future.Get();
+	}
 
 	//---------------------------------------------------------------------
 	// テストケースデータ名一覧取得リクエスト
 	//---------------------------------------------------------------------
-	const TArray<FString> FGetTestCaseListRequest::InvalidTestCaseNames;
-
-	FRequestResult FGetTestCaseListRequest::Request(const FContext& Context)
+	TFuture<FGetTestCaseListResult> RequestGetTestCaseListAsync(const FContext& Context)
 	{
-		Result.Reset();
-		TestCaseNames.Reset();
+		TSharedPtr<TPromise<FGetTestCaseListResult>> Promise = MakeShareable(new TPromise<FGetTestCaseListResult>());
+		TFuture<FGetTestCaseListResult> Future = Promise->GetFuture();
 
 		TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 
 		Request->SetURL(Context.GetURIGetTestCaseNameList());
 		Context.AppendBasicAuthHeader(Request);
 
-		Request->OnProcessRequestComplete().BindRaw(this, &FGetTestCaseListRequest::OnRequestComplete);
-
-		Request->ProcessRequest();
-
-		// HTTPモジュールを強制的に作動させる
-		FHttpModule::Get().GetHttpManager().Flush(false);
-
-		// 上記処理によりOnGetRequestCompleteが呼び出されているため結果にアクセスすることができる。
-		check(Result.IsSet());
-
-		return Result.GetValue();
-	}
-
-	bool FGetTestCaseListRequest::IsValid() const
-	{
-		return Result.IsSet() && TestCaseNames.IsSet();
-	}
-
-	const FRequestResult& FGetTestCaseListRequest::GetResult() const
-	{
-		if (ensureAlways(IsValid()))
+		auto CompleteFunc = [=](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 		{
-			return Result.GetValue();
-		}
-		else
-		{
-			return Internal::InvalidResult;
-		}
-	}
-
-	const TArray<FString>& FGetTestCaseListRequest::GetTestCaseNames() const
-	{
-		if (ensureAlways(IsValid()))
-		{
-			return TestCaseNames.GetValue();
-		}
-		else
-		{
-			return InvalidTestCaseNames;
-		}
-	}
-
-	void FGetTestCaseListRequest::OnRequestComplete(
-		FHttpRequestPtr Request, 
-		FHttpResponsePtr Response,
-		bool bConnectedSuccessfully)
-	{
-		if (!bConnectedSuccessfully)
-		{
-			Result = Internal::ConnectFailedResult;
-		}
-		else
-		{
-			if (Response->GetResponseCode() == EHttpResponseCodes::Ok)
+			if (!bConnectedSuccessfully)
 			{
-				const TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(Response->GetContentAsString());
-				TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject());
-
-				FString Message;
-				TArray<FString> Names;
-				const bool bParseSuccess = FJsonSerializer::Deserialize(JsonReader, JsonObject)
-					&& JsonObject->TryGetStringField(Internal::FJsonKeys::KeyMessage, Message)
-					&& JsonObject->TryGetStringArrayField(Internal::FJsonKeys::KeyTestCases, Names);
-				if(bParseSuccess)
-				{
-					TestCaseNames = Names;
-					Result = FRequestResult(true, Message);
-				}
-				else
-				{
-					const FString Msg = FString::Format(TEXT("ResponseParseFailed. Content: {0}"), { *Response->GetContentAsString() });
-					Result = FRequestResult(false, Msg);
-				}
+				Promise->SetValue(FGetTestCaseListResult(Internal::ConnectFailedResult, TArray<FString>()));
 			}
 			else
 			{
-				Result = FRequestResult(false, Response->GetContentAsString());
+				if (Response->GetResponseCode() == EHttpResponseCodes::Ok)
+				{
+					const TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(Response->GetContentAsString());
+					TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject());
+
+					FString Message;
+					TArray<FString> Names;
+					const bool bParseSuccess = FJsonSerializer::Deserialize(JsonReader, JsonObject)
+						&& JsonObject->TryGetStringField(Internal::FJsonKeys::KeyMessage, Message)
+						&& JsonObject->TryGetStringArrayField(Internal::FJsonKeys::KeyTestCases, Names);
+					if (bParseSuccess)
+					{
+						Promise->SetValue(TTuple<FRequestResult, TArray<FString>>(FRequestResult(true, Message), Names));
+					}
+					else
+					{
+						const FString Msg = FString::Format(TEXT("ResponseParseFailed. Content: {0}"), {*Response->GetContentAsString()});
+						Promise->SetValue(FGetTestCaseListResult(FRequestResult(false, Msg), TArray<FString>()));
+					}
+				}
+				else
+				{
+					Promise->SetValue(FGetTestCaseListResult(FRequestResult(false, Response->GetContentAsString()), TArray<FString>()));
+				}
 			}
-		}
+		};
+
+		Request->OnProcessRequestComplete().BindLambda(CompleteFunc);
+
+		Request->ProcessRequest();
+
+		return Future;
 	}
+
+	FGetTestCaseListResult RequestGetTestCaseList(const FContext& Context)
+	{
+		const TFuture<FGetTestCaseListResult> Future = RequestGetTestCaseListAsync(Context);
+		FHttpModule::Get().GetHttpManager().Flush(false);
+		check(Future.IsReady());
+		return Future.Get();
+	}
+
+
 
 }

@@ -62,6 +62,11 @@ namespace TestHosting
 		{
 		}
 
+		FRequestResult()
+			: bIsSuccess(false), Message(FString())
+		{
+		}
+
 		/**
 		 * @brief 成功したか
 		 */
@@ -73,8 +78,8 @@ namespace TestHosting
 		 */
 		const FString& GetMessage() const { return Message; }
 	private:
-		const bool bIsSuccess;
-		const FString Message;
+		bool bIsSuccess;
+		FString Message;
 	};
 
 	/**
@@ -98,125 +103,69 @@ namespace TestHosting
 		const FString& GetSummary() const { return Summary; }
 
 	private:
-		const FString Name;
-		const TArray<FString> Commands;
-		const FString Summary;
+		FString Name;
+		TArray<FString> Commands;
+		FString Summary;
 	};
-
-	/**
-	 * @brief テストケースデータ取得リクエスト
-	 */
-	class TESTHOSTINGSERVICE_API FGetTestCaseDataRequest final
-	{
-	public:
-
-		/**
-		 * @brief テストケースデータ取得リクエストを行う　※同期実行されます。
-		 * @param TestCaseName 取得したいテストケースデータの名前
-		 * @param Context 認証情報などのコンテキスト
-		 * @return リクエスト結果
-		 */
-		FRequestResult Request(const FString& TestCaseName, const FContext& Context);
-
-		/**
-		 * @brief リクエスト実行済みで有効なデータを持っているか
-		 *         一度もリクエストを行っていない場合有効データがないためfalseを返します。
-		 */
-		bool IsValid() const;
-		
-		/**
-		 * @brief リクエスト結果の取得
-		 *		   IsValid()がfalseを返す状態で呼び出すとensureが発生します。
-		 */
-		const FRequestResult& GetResult() const;
-
-		/**
-		 * @brief リクエストによって取得したテストケースデータの取得
-		 *         IsValid()がfalseを返す状態で呼び出すとensureが発生します。
-		 */
-		const FTestCaseData& GetTestCaseData() const;
-		
-	private:
-		void OnGetRequestComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully);
-
-		TOptional<FRequestResult> Result;
-		TOptional<FTestCaseData> TestCaseData;
-	};
-
 	
 	/**
-	 * @brief テストケースデータ追加・更新リクエスト
-	 *		　既存のテストケースデータに対して送ると更新扱いとなります
+	 * @brief テストケースデータ取得リクエスト結果型
 	 */
-	class TESTHOSTINGSERVICE_API FAddTestCaseDataRequest final
-	{
-	public:
+	using FGetTestCaseDataResult = TTuple<FRequestResult, FTestCaseData>;
 
-		/**
-		 * @brief テストケースデータ追加・更新リクエストを行う
-		 * @param TestCaseData 対象テストケースデータ
-		 * @param Context 認証情報などのコンテキスト
-		 * @return リクエスト結果
-		 */
-		FRequestResult Request(const FTestCaseData& TestCaseData, const FContext& Context);
+	/**
+	 * @brief テストケースデータ取得リクエスト　非同期版
+	 * @param TestCaseName 取得したいテストケースデータの名前
+	 * @param Context 認証情報などのコンテキスト
+	 * @return 結果が入るTFuture
+	 */
+	TESTHOSTINGSERVICE_API TFuture<FGetTestCaseDataResult> RequestGetTestCaseDataAsync(const FString& TestCaseName, const FContext& Context);
 
-		/**
-		 * @brief リクエスト実行済みで有効なデータを持っているか
-		 *         一度もリクエストを行っていない場合有効データがないためfalseを返します。
-		 */
-		bool IsValid() const;
-
-		/**
-		 * @brief リクエスト結果の取得
-		 *		   IsValid()がfalseを返す状態で呼び出すとensureが発生します。
-		 */
-		const FRequestResult& GetResult() const;
-
-	private:
-		void OnRequestComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully);
-		TOptional<FRequestResult> Result;
-	};
+	/**
+	 * @brief テストケースデータ取得リクエスト　同期版
+	 * @param TestCaseName 取得したいテストケースデータの名前
+	 * @param Context 認証情報などのコンテキスト
+	 * @return 結果
+	 */
+	TESTHOSTINGSERVICE_API FGetTestCaseDataResult RequestGetTestCaseData(const FString& TestCaseName, const FContext& Context);
 
 
 	/**
-	 * @brief テストケースデータ名一覧取得リクエスト
+	 * @brief テストケースデータ追加・更新リクエスト 非同期版
+	 *		   既存のテストケースデータに対して送ると更新扱いとなります
+	 * @param TestCaseData 対象テストケースデータ
+	 * @param Context 認証情報などのコンテキスト
+	 * @return 結果が入るTFuture
 	 */
-	class TESTHOSTINGSERVICE_API FGetTestCaseListRequest final
-	{
-	public:
+	TESTHOSTINGSERVICE_API TFuture<FRequestResult> RequestAddTestCaseDataAsync(const FTestCaseData& TestCaseData, const FContext& Context);
 
-		/**
-		 * @brief テストケースデータ追加・更新リクエストを行う
-		 * @param Context 認証情報などのコンテキスト
-		 * @return リクエスト結果
-		 */
-		FRequestResult Request(const FContext& Context);
+	/**
+	 * @brief テストケースデータ追加・更新リクエスト 同期版
+	 *		   既存のテストケースデータに対して送ると更新扱いとなります
+	 * @param TestCaseData 対象テストケースデータ
+	 * @param Context 認証情報などのコンテキスト
+	 * @return 結果
+	 */
+	TESTHOSTINGSERVICE_API FRequestResult RequestAddTestCaseData(const FTestCaseData& TestCaseData, const FContext& Context);
 
-		/**
-		 * @brief リクエスト実行済みで有効なデータを持っているか
-		 *         一度もリクエストを行っていない場合有効データがないためfalseを返します。
-		 */
-		bool IsValid() const;
+	/**
+	 * @brief テストケースデータ名一覧取得リクエスト結果型
+	 */
+	using FGetTestCaseListResult = TTuple<FRequestResult, TArray<FString>>;	
 
-		/**
-		 * @brief リクエスト結果の取得
-		 *		   IsValid()がfalseを返す状態で呼び出すとensureが発生します。
-		 */
-		const FRequestResult& GetResult() const;
-		
-		/**
-		 * @brief テストケースデータ名一覧取得
-		 *		   IsValid()がfalseを返す状態で呼び出すとensureが発生します。
-		 */
-		const TArray<FString>& GetTestCaseNames() const;
+	/**
+	 * @brief テストケースデータ名一覧取得リクエスト　非同期版
+	 * @param Context 認証情報などのコンテキスト
+	 * @return リクエスト結果が入るTFuture
+	 */
+	TESTHOSTINGSERVICE_API TFuture<FGetTestCaseListResult> RequestGetTestCaseListAsync(const FContext& Context);
 
-	private:
-		void OnRequestComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully);
-		TOptional<FRequestResult> Result;
-		TOptional<TArray<FString>> TestCaseNames;
-
-		static const TArray<FString> InvalidTestCaseNames;
-	};
+	/**
+	 * @brief テストケースデータ名一覧取得リクエスト　同期版
+	 * @param Context 認証情報などのコンテキスト
+	 * @return リクエスト結果
+	 */
+	TESTHOSTINGSERVICE_API FGetTestCaseListResult RequestGetTestCaseList(const FContext& Context);
 	
 };
 

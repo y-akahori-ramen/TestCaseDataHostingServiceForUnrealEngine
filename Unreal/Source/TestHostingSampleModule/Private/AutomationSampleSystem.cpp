@@ -106,14 +106,14 @@ public:
 
 			const TestHosting::FTestCaseData SampleTestCaseData(TestCaseDataName, WalkCommands, SampleSummaryText);
 
-			TestHosting::FAddTestCaseDataRequest AddRequest;
-			if (AddRequest.Request(SampleTestCaseData, SampleMisc::Context).IsSuccess())
+			const TestHosting::FRequestResult Result = TestHosting::RequestAddTestCaseData(SampleTestCaseData, SampleMisc::Context);
+			if (Result.IsSuccess())
 			{
-				UE_LOG(LogTemp, Log, TEXT("Success: %s"), *AddRequest.GetResult().GetMessage());
+				UE_LOG(LogTemp, Log, TEXT("Success: %s"), *Result.GetMessage());
 			}
 			else
 			{
-				UE_LOG(LogTemp, Error, TEXT("Failure %s"), *AddRequest.GetResult().GetMessage());
+				UE_LOG(LogTemp, Error, TEXT("Failure %s"), *Result.GetMessage());
 			}
 		}
 		bIsBusy = false;
@@ -164,10 +164,10 @@ public:
 	{
 		UE_LOG(LogTemp, Log, TEXT("Play recording data. name: %s"), *TestCaseName);
 
-		TestHosting::FGetTestCaseDataRequest GetRequest;
-		if (GetRequest.Request(TestCaseName, SampleMisc::Context).IsSuccess())
+		const TestHosting::FGetTestCaseDataResult Result = TestHosting::RequestGetTestCaseData(TestCaseName, SampleMisc::Context);
+		if (Result.Key.IsSuccess())
 		{
-			const TestHosting::FTestCaseData& TestCaseData = GetRequest.GetTestCaseData();
+			const TestHosting::FTestCaseData& TestCaseData = Result.Value;
 			for (const FString& Cmd : TestCaseData.GetCommands())
 			{
 				if (FCommand::IsValidCommand(Cmd))
