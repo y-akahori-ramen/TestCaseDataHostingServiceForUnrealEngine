@@ -42,11 +42,11 @@ IMPLEMENT_COMPLEX_AUTOMATION_TEST(FIntegrateUEAutomationFrameworkSample, "Integr
 void FIntegrateUEAutomationFrameworkSample::GetTests(TArray<FString>& OutBeautifiedNames,
 													 TArray<FString>& OutTestCommands) const
 {
-	TestHosting::FGetTestCaseListRequest GetRequest;
+	const TestHosting::FGetTestCaseListResult Result = TestHosting::RequestGetTestCaseList(SampleMisc::Context);
 
-	if (GetRequest.Request(SampleMisc::Context).IsSuccess())
+	if (Result.Key.IsSuccess())
 	{
-		const TArray<FString>& Names = GetRequest.GetTestCaseNames();
+		const TArray<FString>& Names = Result.Value;
 		for (const FString& Name : Names)
 		{
 			OutBeautifiedNames.Add(Name);

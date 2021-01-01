@@ -106,14 +106,14 @@ public:
 
 			const TestHosting::FTestCaseData SampleTestCaseData(TestCaseDataName, WalkCommands, SampleSummaryText);
 
-			TestHosting::FAddTestCaseDataRequest AddRequest;
-			if (AddRequest.Request(SampleTestCaseData, SampleMisc::Context).IsSuccess())
+			const TestHosting::FRequestResult Result = TestHosting::RequestAddTestCaseData(SampleTestCaseData, SampleMisc::Context);
+			if (Result.IsSuccess())
 			{
-				UE_LOG(LogTemp, Log, TEXT("Success: %s"), *AddRequest.GetResult().GetMessage());
+				UE_LOG(LogTemp, Log, TEXT("Success: %s"), *Result.GetMessage());
 			}
 			else
 			{
-				UE_LOG(LogTemp, Error, TEXT("Failure %s"), *AddRequest.GetResult().GetMessage());
+				UE_LOG(LogTemp, Error, TEXT("Failure %s"), *Result.GetMessage());
 			}
 		}
 		bIsBusy = false;
@@ -164,10 +164,10 @@ public:
 	{
 		UE_LOG(LogTemp, Log, TEXT("Play recording data. name: %s"), *TestCaseName);
 
-		TestHosting::FGetTestCaseDataRequest GetRequest;
-		if (GetRequest.Request(TestCaseName, SampleMisc::Context).IsSuccess())
+		const TestHosting::FGetTestCaseDataResult Result = TestHosting::RequestGetTestCaseData(TestCaseName, SampleMisc::Context);
+		if (Result.Key.IsSuccess())
 		{
-			const TestHosting::FTestCaseData& TestCaseData = GetRequest.GetTestCaseData();
+			const TestHosting::FTestCaseData& TestCaseData = Result.Value;
 			for (const FString& Cmd : TestCaseData.GetCommands())
 			{
 				if (FCommand::IsValidCommand(Cmd))
@@ -275,6 +275,66 @@ void UAutomationSampleSubSystem::Tick(float DeltaTime)
 	{
 		Player->Update(DeltaTime);
 	}
+
+	if(GetListFuture.IsSet() && GetListFuture->IsReady())
+	{
+		const TestHosting::FGetTestCaseListResult Result = GetListFuture->Get();
+
+		if (Result.Key.IsSuccess())
+		{
+			UE_LOG(LogTemp, Log, TEXT("Success: %s"), *Result.Key.GetMessage());
+			for (const FString& Name : Result.Value)
+			{
+				UE_LOG(LogTemp, Log, TEXT("TestCaseName: %s"), *Name);
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failure %s"), *Result.Key.GetMessage());
+		}
+
+		GetListFuture.Reset();
+	}
+
+	if(GetDataFuture.IsSet() && GetDataFuture->IsReady())
+	{
+		const TestHosting::FGetTestCaseDataResult Result = GetDataFuture->Get();
+
+		if (Result.Key.IsSuccess())
+		{
+			const TestHosting::FTestCaseData& Data = Result.Value;
+			UE_LOG(LogTemp, Log, TEXT("Name: %s"), *Data.GetName());
+			UE_LOG(LogTemp, Log, TEXT("Summary: %s"), *Data.GetSummary());
+			UE_LOG(LogTemp, Log, TEXT("Start Dump Commands"));
+			for (const FString& Command : Data.GetCommands())
+			{
+				UE_LOG(LogTemp, Log, TEXT("Command: %s"), *Command);
+			}
+			UE_LOG(LogTemp, Log, TEXT("End Dump Commands"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failure %s"), *Result.Key.GetMessage());
+		}
+		
+		GetDataFuture.Reset();
+	}
+
+	if(AddDataFuture.IsSet() && AddDataFuture->IsReady())
+	{
+		const TestHosting::FRequestResult Result = AddDataFuture->Get();
+
+		if (Result.IsSuccess())
+		{
+			UE_LOG(LogTemp, Log, TEXT("Success: %s"), *Result.GetMessage());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failure %s"), *Result.GetMessage());
+		}
+
+		AddDataFuture.Reset();
+	}
 }
 
 bool UAutomationSampleSubSystem::IsTickable() const
@@ -302,8 +362,37 @@ void UAutomationSampleSubSystem::Play(const FString& TestCaseDataName)
 	Player = MakeShareable(new FPlayer(this, TestCaseDataName));
 }
 
+void UAutomationSampleSubSystem::GetTestCaseListAsync()
+{
+	GetListFuture = TestHosting::RequestGetTestCaseListAsync(SampleMisc::Context);
+}
+
+void UAutomationSampleSubSystem::GetTestCaseDataAsync(const FString& TestCaseDataName)
+{
+	GetDataFuture = TestHosting::RequestGetTestCaseDataAsync(TestCaseDataName, SampleMisc::Context);
+}
+
+void UAutomationSampleSubSystem::AddSampleTestCaseDataAsync(const FString& TestCaseDataName)
+{
+	const FString SampleSummaryText(TEXT("Summary Sample"));
+
+	TArray<FString> SampleCommands;
+	SampleCommands.Add(TEXT("SampleCommandAsync1"));
+	SampleCommands.Add(TEXT("SampleCommandAsync2"));
+	SampleCommands.Add(TEXT("SampleCommandAsync3"));
+	SampleCommands.Add(TEXT("SampleCommandAsync4"));
+	SampleCommands.Add(TEXT("SampleCommandAsync5"));
+
+	const TestHosting::FTestCaseData SampleTestCaseData(TestCaseDataName, SampleCommands, SampleSummaryText);
+
+	AddDataFuture = TestHosting::RequestAddTestCaseDataAsync(SampleTestCaseData, SampleMisc::Context);
+}
+
 bool UAutomationSampleSubSystem::IsBusy() const
 {
 	return (Recorder.IsValid() && Recorder->IsBusy())
-		|| (Player.IsValid() && Player->IsBusy());
+		|| (Player.IsValid() && Player->IsBusy())
+		|| GetListFuture.IsSet()
+		|| GetDataFuture.IsSet()
+		|| AddDataFuture.IsSet();
 }

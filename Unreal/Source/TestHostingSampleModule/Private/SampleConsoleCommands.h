@@ -17,15 +17,32 @@ public:
 	static void GetTestCaseData(const FString& TestCaseName);
 
 	/**
+	 * @brief 指定したテストケース名のデータを取得し内容をログに出力する　非同期
+	 * @param TestCaseName テストケース名
+	 */
+	static void GetTestCaseDataAsync(const FString& TestCaseName);
+
+	/**
 	 * @brief 指定したテストケース名のサンプルデータを追加する
 	 * @param TestCaseName テストケース名
 	 */
 	static void AddSampleTestCaseData(const FString& TestCaseName);
 
 	/**
+	 * @brief 指定したテストケース名のサンプルデータを追加する 非同期版
+	 * @param TestCaseName テストケース名
+	 */
+	static void AddSampleTestCaseDataAsync(const FString& TestCaseName);
+	
+	/**
 	 * @brief テストケース名一覧をログに出力する
 	 */
 	static void GetTestCaseNameList();
+
+	/**
+	 * @brief テストケース名一覧をログに出力する 非同期版
+	 */
+	static void GetTestCaseNameListAsync();
 
 	/**
 	 * @brief 歩きデータの記録を開始する

@@ -8,11 +8,11 @@
 
 void FSampleConsoleCommands::GetTestCaseData(const FString& TestCaseName)
 {
-	TestHosting::FGetTestCaseDataRequest GetRequest;
+	const TestHosting::FGetTestCaseDataResult Result = TestHosting::RequestGetTestCaseData(TestCaseName, SampleMisc::Context);
 
-	if (GetRequest.Request(TestCaseName, SampleMisc::Context).IsSuccess())
+	if (Result.Key.IsSuccess())
 	{
-		const TestHosting::FTestCaseData& Data = GetRequest.GetTestCaseData();
+		const TestHosting::FTestCaseData& Data = Result.Value;
 		UE_LOG(LogTemp, Log, TEXT("Name: %s"), *Data.GetName());
 		UE_LOG(LogTemp, Log, TEXT("Summary: %s"), *Data.GetSummary());
 		UE_LOG(LogTemp, Log, TEXT("Start Dump Commands"));
@@ -24,7 +24,16 @@ void FSampleConsoleCommands::GetTestCaseData(const FString& TestCaseName)
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failure %s"), *GetRequest.GetResult().GetMessage());
+		UE_LOG(LogTemp, Error, TEXT("Failure %s"), *Result.Key.GetMessage());
+	}
+}
+
+void FSampleConsoleCommands::GetTestCaseDataAsync(const FString& TestCaseName)
+{
+	UWorld* World = SampleMisc::GetAnyGameWorld();
+	if (World != nullptr)
+	{
+		World->GetGameInstance()->GetSubsystem<UAutomationSampleSubSystem>()->GetTestCaseDataAsync(TestCaseName);
 	}
 }
 
@@ -41,31 +50,50 @@ void FSampleConsoleCommands::AddSampleTestCaseData(const FString& TestCaseName)
 
 	const TestHosting::FTestCaseData SampleTestCaseData(TestCaseName, SampleCommands, SampleSummaryText);
 
-	TestHosting::FAddTestCaseDataRequest AddRequest;
-	if (AddRequest.Request(SampleTestCaseData, SampleMisc::Context).IsSuccess())
+	const TestHosting::FRequestResult Result = TestHosting::RequestAddTestCaseData(SampleTestCaseData, SampleMisc::Context);
+	if (Result.IsSuccess())
 	{
-		UE_LOG(LogTemp, Log, TEXT("Success: %s"), *AddRequest.GetResult().GetMessage());
+		UE_LOG(LogTemp, Log, TEXT("Success: %s"), *Result.GetMessage());
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failure %s"), *AddRequest.GetResult().GetMessage());
+		UE_LOG(LogTemp, Error, TEXT("Failure %s"), *Result.GetMessage());
+	}
+}
+
+void FSampleConsoleCommands::AddSampleTestCaseDataAsync(const FString& TestCaseName)
+{
+	UWorld* World = SampleMisc::GetAnyGameWorld();
+	if (World != nullptr)
+	{
+		World->GetGameInstance()->GetSubsystem<UAutomationSampleSubSystem>()->AddSampleTestCaseDataAsync(TestCaseName);
 	}
 }
 
 void FSampleConsoleCommands::GetTestCaseNameList()
 {
-	TestHosting::FGetTestCaseListRequest GetListRequest;
-	if (GetListRequest.Request(SampleMisc::Context).IsSuccess())
+	const TestHosting::FGetTestCaseListResult Result = TestHosting::RequestGetTestCaseList(SampleMisc::Context);
+
+	if(Result.Key.IsSuccess())
 	{
-		UE_LOG(LogTemp, Log, TEXT("Success: %s"), *GetListRequest.GetResult().GetMessage());
-		for (const FString& Name : GetListRequest.GetTestCaseNames())
+		UE_LOG(LogTemp, Log, TEXT("Success: %s"), *Result.Key.GetMessage());
+		for (const FString& Name : Result.Value)
 		{
 			UE_LOG(LogTemp, Log, TEXT("TestCaseName: %s"), *Name);
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Failure %s"), *GetListRequest.GetResult().GetMessage());
+		UE_LOG(LogTemp, Error, TEXT("Failure %s"), *Result.Key.GetMessage());
+	}
+}
+
+void FSampleConsoleCommands::GetTestCaseNameListAsync()
+{
+	UWorld* World = SampleMisc::GetAnyGameWorld();
+	if (World != nullptr)
+	{
+		World->GetGameInstance()->GetSubsystem<UAutomationSampleSubSystem>()->GetTestCaseListAsync();
 	}
 }
 
