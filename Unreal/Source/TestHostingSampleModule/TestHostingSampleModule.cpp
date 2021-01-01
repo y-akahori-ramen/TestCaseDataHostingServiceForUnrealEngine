@@ -35,6 +35,23 @@ void FTestHostingSampleModule::StartupModule()
 		);
 
 		IConsoleManager::Get().RegisterConsoleCommand(
+			TEXT("GetTestCaseDataAsync"),
+			TEXT("GetTestCaseDataAsync TestCaseName"),
+			FConsoleCommandWithArgsDelegate::CreateLambda([](const TArray<FString>& Args)
+				{
+					if (Args.Num() != 1)
+					{
+						UE_LOG(LogTemp, Error, TEXT("Command format error"));
+					}
+					else
+					{
+						FSampleConsoleCommands::GetTestCaseDataAsync(Args[0]);
+					}
+				}),
+			ECVF_Default
+		);
+		
+		IConsoleManager::Get().RegisterConsoleCommand(
 			TEXT("AddTestCaseData"),
 			TEXT("AddTestCaseData TestCaseName"),
 			FConsoleCommandWithArgsDelegate::CreateLambda([](const TArray<FString>& Args)
@@ -53,9 +70,34 @@ void FTestHostingSampleModule::StartupModule()
 		);
 
 		IConsoleManager::Get().RegisterConsoleCommand(
+			TEXT("AddTestCaseDataAsync"),
+			TEXT("AddTestCaseDataAsync TestCaseName"),
+			FConsoleCommandWithArgsDelegate::CreateLambda([](const TArray<FString>& Args)
+				{
+					//&AddSampleTestCaseDataCommand
+					if (Args.Num() != 1)
+					{
+						UE_LOG(LogTemp, Error, TEXT("Command format error"));
+					}
+					else
+					{
+						FSampleConsoleCommands::AddSampleTestCaseDataAsync(Args[0]);
+					}
+				}),
+			ECVF_Default
+		);
+
+		IConsoleManager::Get().RegisterConsoleCommand(
 			TEXT("GetTestCaseList"),
 			TEXT("GetTestCaseList"),
 			FConsoleCommandDelegate::CreateLambda([] { FSampleConsoleCommands::GetTestCaseNameList(); }),
+			ECVF_Default
+		);
+
+		IConsoleManager::Get().RegisterConsoleCommand(
+			TEXT("GetTestCaseListAsync"),
+			TEXT("GetTestCaseListAsync"),
+			FConsoleCommandDelegate::CreateLambda([] { FSampleConsoleCommands::GetTestCaseNameListAsync(); }),
 			ECVF_Default
 		);
 

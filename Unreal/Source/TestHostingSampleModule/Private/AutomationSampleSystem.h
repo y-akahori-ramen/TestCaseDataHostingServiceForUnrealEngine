@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "TestHostingAPI.h"
 #include "AutomationSampleSystem.generated.h"
 
 /**
@@ -37,7 +38,23 @@ public:
 	 */
 	void Play(const FString& TestCaseDataName);
 
+	/**
+	 * @brief 非同期でテストケース一覧を取得し、ログに出力する
+	 */
+	void GetTestCaseListAsync();
+	
+	/**
+	 * @brief 非同期でテストケースを取得し、ログに出力する
+	 * @param TestCaseDataName テストケース名
+	 */
+	void GetTestCaseDataAsync(const FString& TestCaseDataName);
 
+	/**
+	 * @brief 非同期でサンプルテストケースデータを追加する
+	 * @param TestCaseDataName テストケース名
+	 */
+	void AddSampleTestCaseDataAsync(const FString& TestCaseDataName);
+	
 	/**
 	 * @brief 記録もしくは再生が行われているか
 	 */
@@ -49,4 +66,8 @@ private:
 
 	TSharedPtr<FRecorder> Recorder;
 	TSharedPtr<FPlayer> Player;
+
+	TOptional<TFuture<TestHosting::FGetTestCaseListResult>> GetListFuture;
+	TOptional<TFuture<TestHosting::FGetTestCaseDataResult>> GetDataFuture;
+	TOptional<TFuture<TestHosting::FRequestResult>> AddDataFuture;
 };
