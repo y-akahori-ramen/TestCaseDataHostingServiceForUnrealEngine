@@ -12,13 +12,14 @@
  * Third Person Templateで歩いたプレイヤーの情報を保存し、保存されたデータから歩きを再現する 
  */
 UCLASS()
-class UAutomationSampleSubSystem : public UGameInstanceSubsystem, public FTickableGameObject
+class UAutomationSampleSubSystem final : public UGameInstanceSubsystem, public FTickableGameObject
 {
 	GENERATED_BODY()
 public:
 	virtual TStatId GetStatId() const override;
 	virtual void Tick(float DeltaTime) override;
 	virtual bool IsTickable() const override;
+	virtual ETickableTickType GetTickableTickType() const override;
 
 	/**
 	 * @brief プレイヤーの歩きデータを記録する

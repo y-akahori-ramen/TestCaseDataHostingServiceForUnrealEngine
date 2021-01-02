@@ -342,6 +342,11 @@ bool UAutomationSampleSubSystem::IsTickable() const
 	return IsBusy();
 }
 
+ETickableTickType UAutomationSampleSubSystem::GetTickableTickType() const
+{
+	return IsTemplate() ? ETickableTickType::Never : ETickableTickType::Conditional;
+}
+
 void UAutomationSampleSubSystem::StartRecording()
 {
 	Recorder = MakeShareable(new FRecorder(this));
