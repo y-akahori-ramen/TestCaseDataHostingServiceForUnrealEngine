@@ -90,7 +90,7 @@ namespace TestHosting
 		Request->SetURL(Context.GetURIGetTestCaseData(TestCaseName));
 		Context.AppendBasicAuthHeader(Request);
 
-		auto CompleteFunc = [=](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
+		auto CompleteFunc = [Promise](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 		{
 			if (!bConnectedSuccessfully)
 			{
@@ -195,7 +195,7 @@ namespace TestHosting
 		Request->SetContentAsString(JsonString);
 		Request->SetHeader("Content-Type", TEXT("application/json"));
 
-		auto CompleteFunc = [=](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
+		auto CompleteFunc = [Promise](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 		{
 			if (!bConnectedSuccessfully)
 			{
@@ -257,7 +257,7 @@ namespace TestHosting
 		Request->SetURL(Context.GetURIGetTestCaseNameList());
 		Context.AppendBasicAuthHeader(Request);
 
-		auto CompleteFunc = [=](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
+		auto CompleteFunc = [Promise](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 		{
 			if (!bConnectedSuccessfully)
 			{
