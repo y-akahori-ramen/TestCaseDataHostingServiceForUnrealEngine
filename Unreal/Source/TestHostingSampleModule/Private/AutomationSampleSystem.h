@@ -42,7 +42,7 @@ public:
 	 * @brief 非同期でテストケース一覧を取得し、ログに出力する
 	 */
 	void GetTestCaseListAsync();
-	
+
 	/**
 	 * @brief 非同期でテストケースを取得し、ログに出力する
 	 * @param TestCaseDataName テストケース名
@@ -54,7 +54,7 @@ public:
 	 * @param TestCaseDataName テストケース名
 	 */
 	void AddSampleTestCaseDataAsync(const FString& TestCaseDataName);
-	
+
 	/**
 	 * @brief 記録もしくは再生が行われているか
 	 */

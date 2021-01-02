@@ -40,8 +40,8 @@ namespace TestHosting
 	FContext::FContext(const FString& User, const FString& Password, const FString& ServiceURI)
 		: UserPasswordForBasicAuth(FBase64::Encode(FString::Format(TEXT("{0}:{1}"), {*User, *Password}))),
 		  ServiceURI(ServiceURI),
-		  AddURI(FString::Format(TEXT("{0}/add/"), { *ServiceURI })),
-	      GetListURI(FString::Format(TEXT("{0}/list/"), { *ServiceURI }))
+		  AddURI(FString::Format(TEXT("{0}/add/"), {*ServiceURI})),
+		  GetListURI(FString::Format(TEXT("{0}/list/"), {*ServiceURI}))
 	{
 	}
 
@@ -75,7 +75,7 @@ namespace TestHosting
 		  Summary(Summary)
 	{
 	}
-	
+
 	//---------------------------------------------------------------------
 	// テストケースデータ取得リクエスト
 	//---------------------------------------------------------------------
@@ -83,7 +83,7 @@ namespace TestHosting
 	{
 		TSharedPtr<TPromise<FGetTestCaseDataResult>> Promise = MakeShareable(new TPromise<FGetTestCaseDataResult>());
 		TFuture<FGetTestCaseDataResult> Future = Promise->GetFuture();
-		
+
 
 		TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 
@@ -125,7 +125,7 @@ namespace TestHosting
 					}
 					else
 					{
-						const FString Msg = FString::Format(TEXT("ResponseParseFailed. Content: {0}"), { *Response->GetContentAsString() });
+						const FString Msg = FString::Format(TEXT("ResponseParseFailed. Content: {0}"), {*Response->GetContentAsString()});
 						Promise->SetValue(
 							FGetTestCaseDataResult(
 								FRequestResult(false, Msg),
@@ -145,7 +145,7 @@ namespace TestHosting
 				}
 			}
 		};
-		
+
 		Request->OnProcessRequestComplete().BindLambda(CompleteFunc);
 
 		Request->ProcessRequest();
@@ -169,7 +169,7 @@ namespace TestHosting
 	{
 		TSharedPtr<TPromise<FRequestResult>> Promise = MakeShareable(new TPromise<FRequestResult>());
 		TFuture<FRequestResult> Future = Promise->GetFuture();
-		
+
 		// Jsonデータの作成
 		TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject);
 		TArray<TSharedPtr<FJsonValue>> Commands;
@@ -218,7 +218,7 @@ namespace TestHosting
 					}
 					else
 					{
-						const FString Msg = FString::Format(TEXT("ResponseParseFailed. Content: {0}"), { *Response->GetContentAsString() });
+						const FString Msg = FString::Format(TEXT("ResponseParseFailed. Content: {0}"), {*Response->GetContentAsString()});
 						Promise->SetValue(FRequestResult(false, Msg));
 					}
 				}
@@ -306,7 +306,4 @@ namespace TestHosting
 		check(Future.IsReady());
 		return Future.Get();
 	}
-
-
-
 }

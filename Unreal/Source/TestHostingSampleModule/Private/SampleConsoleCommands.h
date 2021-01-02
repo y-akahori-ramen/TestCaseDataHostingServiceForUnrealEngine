@@ -33,7 +33,7 @@ public:
 	 * @param TestCaseName テストケース名
 	 */
 	static void AddSampleTestCaseDataAsync(const FString& TestCaseName);
-	
+
 	/**
 	 * @brief テストケース名一覧をログに出力する
 	 */
@@ -49,7 +49,7 @@ public:
 	 */
 	static void StartRecording();
 
-	
+
 	/**
 	 * @brief 歩きデータの記録を終了し、指定した名前でデータを保存する
 	 * @param TestCaseName 保存するデータ名

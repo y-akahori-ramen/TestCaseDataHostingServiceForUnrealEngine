@@ -11,5 +11,4 @@ namespace SampleMisc
 	extern const TestHosting::FContext Context;
 
 	UWorld* GetAnyGameWorld();
-
 }

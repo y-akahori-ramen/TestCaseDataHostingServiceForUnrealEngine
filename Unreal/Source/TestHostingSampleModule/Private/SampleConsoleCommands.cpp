@@ -74,7 +74,7 @@ void FSampleConsoleCommands::GetTestCaseNameList()
 {
 	const TestHosting::FGetTestCaseListResult Result = TestHosting::RequestGetTestCaseList(SampleMisc::Context);
 
-	if(Result.Key.IsSuccess())
+	if (Result.Key.IsSuccess())
 	{
 		UE_LOG(LogTemp, Log, TEXT("Success: %s"), *Result.Key.GetMessage());
 		for (const FString& Name : Result.Value)
@@ -100,7 +100,7 @@ void FSampleConsoleCommands::GetTestCaseNameListAsync()
 void FSampleConsoleCommands::StartRecording()
 {
 	UWorld* World = SampleMisc::GetAnyGameWorld();
-	if(World != nullptr)
+	if (World != nullptr)
 	{
 		World->GetGameInstance()->GetSubsystem<UAutomationSampleSubSystem>()->StartRecording();
 	}
@@ -123,4 +123,3 @@ void FSampleConsoleCommands::PlayRecordingData(const FString& TestCaseName)
 		World->GetGameInstance()->GetSubsystem<UAutomationSampleSubSystem>()->Play(TestCaseName);
 	}
 }
-

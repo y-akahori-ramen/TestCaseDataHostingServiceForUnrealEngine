@@ -199,9 +199,9 @@ public:
 		if (ActiveCommand.IsValid())
 		{
 			MoveElapsedTime += DeltaTime;
-			
+
 			APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(WorldContextObject, 0);
-			if(ActiveCommand->IsTeleport())
+			if (ActiveCommand->IsTeleport())
 			{
 				PlayerPawn->TeleportTo(ActiveCommand->GetPos(), PlayerPawn->GetActorRotation());
 				ActiveCommand.Reset();
@@ -222,26 +222,26 @@ public:
 				}
 				else
 				{
-					if(bTimeOut)
+					if (bTimeOut)
 					{
 						UE_LOG(LogTemp, Warning, TEXT("Time out"));
 					}
 
-					if(!FMath::IsNearlyZero(DistanceXYSeq))
+					if (!FMath::IsNearlyZero(DistanceXYSeq))
 					{
 						PlayerPawn->TeleportTo(ActiveCommand->GetPos(), PlayerPawn->GetActorRotation());
 					}
-					
+
 					ActiveCommand.Reset();
 				}
 			}
 
-			if(!IsBusy())
+			if (!IsBusy())
 			{
 				UE_LOG(LogTemp, Log, TEXT("Complete."))
 			}
 		}
-		else if(!Commands.IsEmpty())
+		else if (!Commands.IsEmpty())
 		{
 			Commands.Dequeue(ActiveCommand);
 			MoveElapsedTime = 0;
@@ -276,7 +276,7 @@ void UAutomationSampleSubSystem::Tick(float DeltaTime)
 		Player->Update(DeltaTime);
 	}
 
-	if(GetListFuture.IsSet() && GetListFuture->IsReady())
+	if (GetListFuture.IsSet() && GetListFuture->IsReady())
 	{
 		const TestHosting::FGetTestCaseListResult Result = GetListFuture->Get();
 
@@ -296,7 +296,7 @@ void UAutomationSampleSubSystem::Tick(float DeltaTime)
 		GetListFuture.Reset();
 	}
 
-	if(GetDataFuture.IsSet() && GetDataFuture->IsReady())
+	if (GetDataFuture.IsSet() && GetDataFuture->IsReady())
 	{
 		const TestHosting::FGetTestCaseDataResult Result = GetDataFuture->Get();
 
@@ -316,11 +316,11 @@ void UAutomationSampleSubSystem::Tick(float DeltaTime)
 		{
 			UE_LOG(LogTemp, Error, TEXT("Failure %s"), *Result.Key.GetMessage());
 		}
-		
+
 		GetDataFuture.Reset();
 	}
 
-	if(AddDataFuture.IsSet() && AddDataFuture->IsReady())
+	if (AddDataFuture.IsSet() && AddDataFuture->IsReady())
 	{
 		const TestHosting::FRequestResult Result = AddDataFuture->Get();
 

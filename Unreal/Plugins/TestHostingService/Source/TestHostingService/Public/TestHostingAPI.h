@@ -7,7 +7,6 @@
 
 namespace TestHosting
 {
-	
 	/**
 	 * @brief APIを使用するのに必要な各種情報
 	 */
@@ -37,7 +36,7 @@ namespace TestHosting
 		 * @brief テストケース名一覧取得用のURIを取得する
 		 */
 		FString GetURIGetTestCaseNameList() const;
-		
+
 		/**
 		 * @brief HTTPリクエストにBasic認証ヘッダーを追加する
 		 * @param Request HTTPリクエスト
@@ -107,7 +106,7 @@ namespace TestHosting
 		TArray<FString> Commands;
 		FString Summary;
 	};
-	
+
 	/**
 	 * @brief テストケースデータ取得リクエスト結果型
 	 */
@@ -151,7 +150,7 @@ namespace TestHosting
 	/**
 	 * @brief テストケースデータ名一覧取得リクエスト結果型
 	 */
-	using FGetTestCaseListResult = TTuple<FRequestResult, TArray<FString>>;	
+	using FGetTestCaseListResult = TTuple<FRequestResult, TArray<FString>>;
 
 	/**
 	 * @brief テストケースデータ名一覧取得リクエスト　非同期版
@@ -166,6 +165,4 @@ namespace TestHosting
 	 * @return リクエスト結果
 	 */
 	TESTHOSTINGSERVICE_API FGetTestCaseListResult RequestGetTestCaseList(const FContext& Context);
-	
 };
-

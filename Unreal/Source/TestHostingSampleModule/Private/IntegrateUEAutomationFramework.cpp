@@ -36,11 +36,11 @@ bool FWaitAutomationCommand::Update()
 
 // セッションフロントのAutomation向け
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FIntegrateUEAutomationFrameworkSample, "IntegrateAutomationSample",
-	EAutomationTestFlags::EditorContext | EAutomationTestFlags::ClientContext |
-	EAutomationTestFlags::ProductFilter)
+                                  EAutomationTestFlags::EditorContext | EAutomationTestFlags::ClientContext |
+                                  EAutomationTestFlags::ProductFilter)
 
 void FIntegrateUEAutomationFrameworkSample::GetTests(TArray<FString>& OutBeautifiedNames,
-													 TArray<FString>& OutTestCommands) const
+                                                     TArray<FString>& OutTestCommands) const
 {
 	const TestHosting::FGetTestCaseListResult Result = TestHosting::RequestGetTestCaseList(SampleMisc::Context);
 
