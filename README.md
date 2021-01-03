@@ -31,8 +31,19 @@ UnrealEngineのアセットとしてデータを持たせることも一つの�
 
 ### TODO:API
 ## UnrealEngineプラグイン
-[Unreal](Unreal)フォルダにUnrealEngineプロジェクトがあります。  
-[Unreal/Plugins/TestHostingService](Unreal/Plugins/TestHostingService)にAPIプラグインがあります。  
-[Unreal/Source/TestHostingSampleModule](Unreal/Source/TestHostingSampleModule)にプラグインを利用するサンプルモジュールがあります。  
 
-### TODO:サンプル内容
+### プロジェクト
+[Unreal](Unreal)フォルダにUnrealEngineプロジェクトがあります。  
+この中にプラグインとサンプルがあります。
+
+### プラグイン
+[Unreal/Plugins/TestHostingService](Unreal/Plugins/TestHostingService)にAPIプラグインがあります。  
+APIは[TestHostingAPI.h](Unreal/Plugins/TestHostingService/Source/TestHostingService/Public/TestHostingAPI.h)にまとめられています。
+
+### サンプル
+[Unreal/Source/TestHostingSampleModule](Unreal/Source/TestHostingSampleModule)にプラグインを利用するサンプルモジュールがあります。
+
+サンプルで作成したコンソールコマンドの実装が[SampleConsoleCommands.cpp](Unreal/Source/TestHostingSampleModule/Private/SampleConsoleCommands.cpp)にありますのでここからたどると把握しやすいです。
+
+UnrealEngineのAutomation frameworkと連携するサンプルが[IntegrateUEAutomationFramework.cpp](Unreal/Source/TestHostingSampleModule/Private/IntegrateUEAutomationFramework.cpp)にあります。  
+ホスティングサービスに保存されているテストケースデータをUnrealEngineの自動テストから扱えるようにしています。
